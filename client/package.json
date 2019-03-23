@@ -4,15 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "parcel ./src/index.html",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "parcel ./src/index.html"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "parcel-bundler": "^1.12.3",
+    "polished": "^3.0.4",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
+    "react-router": "^5.0.0",
+    "react-router-dom": "^5.0.0",
     "styled-components": "^4.1.3"
   }
 }
