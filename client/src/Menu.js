@@ -43,6 +43,8 @@ export default styled(Menu)`
   right: 0;
   text-align: right;
   padding-right: ${p => p.theme.bodyPadding};
+  padding-left: ${p => p.theme.bodyPadding};
+  background: ${p => p.theme.colorBg};
 
   ul {
     margin-top: 1em;

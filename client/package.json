@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "parcel ./src/index.html"
+    "start": "node ./bundler.js"
   },
   "author": "",
   "license": "ISC",
@@ -16,5 +16,10 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "styled-components": "^4.1.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/plugin-transform-runtime": "^7.4.0"
   }
 }

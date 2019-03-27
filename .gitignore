@@ -62,3 +62,5 @@ typings/
 
 .cache
 dist/
+commander/data
+commander/secrets.json

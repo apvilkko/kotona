@@ -8,7 +8,7 @@ import GlobalStyle from "./GlobalStyle";
 import PAGES from "./pages";
 
 export default () => (
-  <BrowserRouter>
+  <BrowserRouter basename="ui">
     <ThemeProvider theme={theme}>
       <>
         <GlobalStyle />
