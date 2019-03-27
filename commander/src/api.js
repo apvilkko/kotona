@@ -2,18 +2,20 @@ const dbFactory = require("./db");
 const integrationsFactory = require("./integrations/index");
 const express = require("express");
 const bodyParser = require("body-parser");
+const router = require("express-promise-router")();
 
 const PORTS = require("../../ports");
 const port = PORTS.commander;
 
 const COMMANDS = "commands";
 let integrations = {};
+let db = null;
 
-const startServer = db => {
+const startServer = () => {
   const app = express();
   app.use(bodyParser.json());
 
-  app.get("/commands", (req, res) => {
+  router.get("/commands", (req, res) => {
     res.json(db.getCollection(COMMANDS));
   });
 
@@ -21,21 +23,31 @@ const startServer = db => {
     res.json(db.saveEntity(COMMANDS, req.body));
   };
 
-  app.post("/commands", saveCommand);
-  app.put("/commands/:id", saveCommand);
-  app.delete("/commands/:id", (req, res) => {
+  router.post("/commands", saveCommand);
+  router.put("/commands/:id", saveCommand);
+  router.delete("/commands/:id", (req, res) => {
     res.json(db.deleteEntity(COMMANDS, req.params.id));
   });
 
-  app.post("/commands/:id/run", (req, res) => {
+  router.post("/commands/:id/run", async (req, res) => {
     const command = db.getEntity(COMMANDS, req.params.id);
     console.log("run", command);
     const integration = "lights/tradfri";
     const { device: deviceId, parameter, value } = command;
-    integrations[integration].setDeviceState(deviceId, parameter, value);
-    res.sendStatus(200);
+    try {
+      await integrations[integration].setDeviceState(
+        deviceId,
+        parameter,
+        value
+      );
+      res.sendStatus(200);
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(400);
+    }
   });
 
+  app.use(router);
   console.log(`Starting commander on port`, port);
   app.listen(port);
 };
@@ -45,6 +57,7 @@ dbFactory.initialize(dbInstance => {
   integrationsFactory.initialize(data => {
     integrations = data;
     console.log("Initialized integrations", Object.keys(integrations));
-    startServer(dbInstance);
+    db = dbInstance;
+    startServer();
   });
 });

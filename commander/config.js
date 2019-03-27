@@ -7,9 +7,7 @@ module.exports = () => ({
     {
       plugin: "lights/tradfri",
       config: {
-        gatewayIp: secrets["lights/tradfri"].gatewayIp,
-        username: secrets["lights/tradfri"].username,
-        key: secrets["lights/tradfri"].key
+        ...secrets["lights/tradfri"]
       }
     }
   ]

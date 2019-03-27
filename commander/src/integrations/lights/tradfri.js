@@ -1,3 +1,5 @@
+const exec = require("child_process").exec;
+
 const TYPE_DEVICE = 15001;
 const COMMANDS = {
   state: 5850,
@@ -9,6 +11,18 @@ const COMMANDS = {
 };
 
 let config = {};
+
+const doRequest = command =>
+  new Promise((resolve, reject) => {
+    console.log("exec: ", command);
+    exec(command, { timeout: 4000 }, (err, stdout, stderr) => {
+      if (!err) {
+        resolve(stdout);
+      } else {
+        reject(err ? err : stderr);
+      }
+    });
+  });
 
 const getUri = (gatewayIp, deviceId) => {
   const uri = `coaps://${gatewayIp}:5684/${TYPE_DEVICE}`;
@@ -43,7 +57,8 @@ const createParams = (method, payload, deviceId) =>
 
 const setDeviceState = (deviceId, parameter, value) => {
   const params = createParams("put", createPayload(parameter, value), deviceId);
-  console.log("setDeviceState", deviceId, parameter, value, params);
+  console.log("setDeviceState", deviceId, parameter, value);
+  return doRequest(`${config.coapClient} ${params}`);
 };
 
 const api = { setDeviceState };
