@@ -61,7 +61,6 @@ typings/
 .next
 
 .cache
-dist/
 commander/data
 commander/secrets.json
 run.json

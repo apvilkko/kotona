@@ -11,7 +11,8 @@ const entryFiles = Path.join(__dirname, "./src/index.html");
 
 // Bundler options
 const options = {
-  publicUrl: "/ui"
+  publicUrl: "/ui",
+  sourceMaps: false
 };
 
 (async function() {

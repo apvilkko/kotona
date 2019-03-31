@@ -29,23 +29,37 @@ const PROPS = {
 
 let config = {};
 
+const MAX_TRIES = 3;
+
+const execRequest = (command, resolve, reject, parse, tries) => {
+  exec(command, { timeout: 4000 }, (err, stdout, stderr) => {
+    if (!err) {
+      let parsed = stdout;
+      try {
+        console.log("stdout", stdout, stdout.split("\n"));
+        parsed = parse ? JSON.parse(stdout) : stdout;
+        resolve(parsed);
+      } catch (e) {
+        reject(e);
+      }
+    } else {
+      if (tries >= MAX_TRIES) {
+        reject(err ? err : stderr);
+      } else {
+        console.log("Retrying");
+        setTimeout(() => {
+          execRequest(command, resolve, reject, parse, tries + 1);
+        }, 300);
+      }
+    }
+  });
+};
+
 const doRequest = (command, parse = false, delayMs) =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
       console.log("exec: ", command);
-      exec(command, { timeout: 4000 }, (err, stdout, stderr) => {
-        if (!err) {
-          let parsed = stdout;
-          try {
-            parsed = parse ? JSON.parse(stdout) : stdout;
-            resolve(parsed);
-          } catch (e) {
-            reject(e);
-          }
-        } else {
-          reject(err ? err : stderr);
-        }
-      });
+      execRequest(command, resolve, reject, parse, 0);
     }, delayMs || 0);
   });
 

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, Switch, Route } from "react-router-dom";
 import styled from "styled-components";
 import Closer from "./components/Closer";
-import { BaseButton } from "./components/Button";
+import Button, { BaseButton } from "./components/Button";
 import t from "./i18n";
 import PAGES from "./pages";
 
@@ -14,8 +14,23 @@ const Opener = styled(({ className, handleClick }) => (
   border: none;
 `;
 
+const isFullscreen = () => 1 >= outerHeight - innerHeight;
+
 const Menu = ({ className }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [fullScreen, setFullScreen] = useState(isFullscreen());
+
+  useEffect(
+    () => {
+      const el = document.documentElement;
+      if (fullScreen && !isFullscreen()) {
+        el.requestFullscreen();
+      } else {
+        el.exitFullscreen();
+      }
+    },
+    [fullScreen]
+  );
 
   return (
     <div className={className}>
@@ -28,6 +43,11 @@ const Menu = ({ className }) => {
                 <NavLink to={page.path}>{t(page.label)}</NavLink>
               </li>
             ))}
+            <li>
+              <Button onClick={() => setFullScreen(!fullScreen)}>
+                fullscreen
+              </Button>
+            </li>
           </ul>
         </div>
       ) : (
