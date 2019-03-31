@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node ./bundler.js",
     "build": "NODE_ENV=production node ./bundler.js",
-    "run": "http-server-spa dist /index.html 9451"
+    "run": "http-server-spa dist /index.html 9451 && chromium-browser --start-fullscreen http://localhost:9450"
   },
   "author": "",
   "license": "ISC",
