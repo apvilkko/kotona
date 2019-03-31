@@ -12,5 +12,12 @@
     "watch": false,
     "script": "api.js",
     "sourceDir": "PWD/commander/src"
+  },
+  {
+    "uid": "client",
+    "append": true,
+    "watch": false,
+    "script": "bundler.js",
+    "sourceDir": "PWD/client"
   }
 ]
