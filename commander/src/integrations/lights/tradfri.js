@@ -49,7 +49,6 @@ const execRequest = (command, resolve, reject, parse, tries) => {
     if (!err) {
       let parsed = stdout;
       try {
-        console.log("stdout", stdout, stdout.split("\n"));
         parsed = parse ? parseResponse(stdout) : stdout;
         resolve(parsed);
       } catch (e) {
