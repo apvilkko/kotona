@@ -17,7 +17,7 @@
     "uid": "client",
     "append": true,
     "watch": false,
-    "script": "bundler.js",
+    "script": "serve.js",
     "sourceDir": "PWD/client"
   }
 ]
