@@ -12,9 +12,9 @@ const mime = Object.entries(typesJson).reduce(
   {}
 );
 
-const root = process.argv[2] || "./dist";
+const root = process.argv[2] || "dist";
 const fallback = process.argv[3] || "index.html";
-const port = process.argv[4] || require("../ports.json").bus;
+const port = process.argv[4] || require("../ports.json").client;
 const cwd = process.cwd();
 
 const sendError = (res, resource, status) => {
@@ -89,5 +89,5 @@ http
 console.log(`\n 🗂  Serving files from ./${root} on http://localhost:${port}`);
 console.log(` 🖥  Using ${fallback} as the fallback for route requests`);
 
-const page = `http://localhost:${port}`;
+const page = `http://localhost:${require("../ports.json").bus}`;
 require("child_process").exec(`chromium-browser --start-fullscreen ${page}`);

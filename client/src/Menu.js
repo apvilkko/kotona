@@ -18,19 +18,6 @@ const isFullscreen = () => 1 >= outerHeight - innerHeight;
 
 const Menu = ({ className }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [fullScreen, setFullScreen] = useState(isFullscreen());
-
-  useEffect(
-    () => {
-      const el = document.documentElement;
-      if (fullScreen && !isFullscreen()) {
-        el.requestFullscreen();
-      } else {
-        el.exitFullscreen();
-      }
-    },
-    [fullScreen]
-  );
 
   return (
     <div className={className}>
@@ -44,7 +31,15 @@ const Menu = ({ className }) => {
               </li>
             ))}
             <li>
-              <Button onClick={() => setFullScreen(!fullScreen)}>
+              <Button
+                onClick={() => {
+                  if (isFullscreen()) {
+                    document.exitFullscreen();
+                  } else {
+                    document.documentElement.requestFullscreen();
+                  }
+                }}
+              >
                 fullscreen
               </Button>
             </li>
