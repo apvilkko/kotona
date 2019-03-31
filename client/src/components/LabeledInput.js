@@ -1,10 +1,16 @@
 import React from "react";
 
-export default ({ id, label, value, handleChange }) => {
+export default ({ id, label, value, handleChange, type = "text", ...rest }) => {
   return (
     <div>
       <label htmlFor={id}>{label}</label>
-      <input type="text" value={value} onChange={handleChange(id)} />
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={handleChange(id)}
+        {...rest}
+      />
     </div>
   );
 };

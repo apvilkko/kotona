@@ -12,7 +12,10 @@ const getEntity = (collection, id) => {
   return db.getCollection(collection).findOne({ id });
 };
 
-const saveEntity = (collection, entity) => {
+const saveEntity = (collection, entity, insert = false) => {
+  if (insert) {
+    return db.getCollection(collection).insert(entity);
+  }
   if (entity.id) {
     return db.getCollection(collection).update(entity);
   }
@@ -25,7 +28,30 @@ const deleteEntity = (collection, id) => {
   }
 };
 
-const api = { getCollection, saveEntity, deleteEntity, getEntity };
+const syncDevices = (integration, devices) => {
+  const collection = "entities";
+  devices.forEach(device => {
+    const existing = db
+      .getCollection(collection)
+      .findOne({ deviceId: device.deviceId });
+    if (existing) {
+      saveEntity(collection, {
+        ...existing,
+        name: device.name,
+        data: device.data
+      });
+    } else {
+      saveEntity(collection, {
+        ...device,
+        type: "device",
+        integration
+      });
+    }
+  });
+  console.log(`Synced ${devices.length} devices.`);
+};
+
+const api = { getCollection, saveEntity, deleteEntity, getEntity, syncDevices };
 
 const initLoki = (collections, done) => () => {
   collections.forEach(collection => {

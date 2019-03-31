@@ -8,12 +8,41 @@ const PORTS = require("../../ports");
 const port = PORTS.commander;
 
 const COMMANDS = "commands";
+const DEVICES = "entities";
 let integrations = {};
 let db = null;
 
 const startServer = () => {
   const app = express();
   app.use(bodyParser.json());
+
+  router.get("/devices", async (req, res) => {
+    const integration = "lights/tradfri";
+    const dbDevices = db.getCollection(DEVICES);
+    const devices = await integrations[integration].getDevices();
+    const idMap = {};
+    dbDevices.forEach(device => {
+      idMap[device.deviceId] = device.id;
+    });
+    res.json(devices.map(x => ({ ...x, id: idMap[x.deviceId] })));
+  });
+
+  router.post("/devices/:id", async (req, res) => {
+    const dbDevice = db.getEntity(DEVICES, req.params.id);
+    const integration = "lights/tradfri";
+    console.log("body", req.body);
+    try {
+      await integrations[integration].setDeviceState(
+        dbDevice.deviceId,
+        Object.keys(req.body)[0],
+        Object.values(req.body)[0]
+      );
+      res.sendStatus(200);
+    } catch (e) {
+      console.error(e);
+      res.sendStatus(400);
+    }
+  });
 
   router.get("/commands", (req, res) => {
     res.json(db.getCollection(COMMANDS));
@@ -57,6 +86,15 @@ dbFactory.initialize(dbInstance => {
   integrationsFactory.initialize(data => {
     integrations = data;
     console.log("Initialized integrations", Object.keys(integrations));
+    Object.keys(integrations).forEach(key => {
+      const integration = integrations[key];
+      integration
+        .getDevices()
+        .then(devices => {
+          dbInstance.syncDevices(key, devices);
+        })
+        .catch(console.error);
+    });
     db = dbInstance;
     startServer();
   });

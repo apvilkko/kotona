@@ -2,60 +2,17 @@ import React, { useState, useEffect } from "react";
 import Loading from "./components/Loading";
 import Button from "./components/Button";
 import LabeledInput from "./components/LabeledInput";
-
-const useFetch = () => {
-  const [data, setData] = useState(null);
-  const [request, setRequest] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!request.url) {
-        return;
-      }
-      setError(null);
-      setIsLoading(true);
-
-      try {
-        const opts = {
-          method: request.method,
-          headers: { "Content-Type": "application/json" }
-        };
-        if (request.body) {
-          opts.body = JSON.stringify(request.body);
-        }
-        const resp = await fetch(request.url, opts);
-        const json = await resp.json();
-
-        setData(json);
-      } catch (err) {
-        setError(err);
-      }
-
-      setIsLoading(false);
-    };
-
-    fetchData();
-  }, [request]);
-
-  const doRequest = req => {
-    setRequest(req);
-  };
-
-  const doFetch = url => {
-    doRequest({ method: "get", url });
-  };
-
-  return { data, isLoading, error, doFetch, doRequest };
-};
+import useFetch from "./useFetch";
 
 const CommandsContainer = ({ render, reload }) => {
   const { data, isLoading, error, doFetch } = useFetch();
 
-  useEffect(() => {
-    doFetch("/api/commands");
-  }, [reload]);
+  useEffect(
+    () => {
+      doFetch("/api/commands");
+    },
+    [reload]
+  );
 
   if (error) return "" + error;
   if (isLoading) return <Loading />;
@@ -100,9 +57,12 @@ const fields = [
 const CommandEditor = ({ current, currentData, onExit }) => {
   const [formData, setFormData] = useState(null);
 
-  useEffect(() => {
-    setFormData(currentData);
-  }, [currentData]);
+  useEffect(
+    () => {
+      setFormData(currentData);
+    },
+    [currentData]
+  );
 
   const handleChange = id => evt => {
     setFormData({
@@ -143,12 +103,15 @@ export default () => {
   const { doRequest, isLoading } = useFetch();
   const [pendingReload, setPendingReload] = useState(false);
 
-  useEffect(() => {
-    if (!isLoading && pendingReload) {
-      setPendingReload(false);
-      setReload(new Date().getTime());
-    }
-  }, [reload, isLoading]);
+  useEffect(
+    () => {
+      if (!isLoading && pendingReload) {
+        setPendingReload(false);
+        setReload(new Date().getTime());
+      }
+    },
+    [reload, isLoading]
+  );
 
   const requestReload = () => setPendingReload(true);
 

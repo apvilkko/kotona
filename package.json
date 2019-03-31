@@ -1,0 +1,27 @@
+{
+  "name": "kotona",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "cd ./bus && npm install && cd ../commander && npm install",
+    "start": "npm run init && forever start ./run.json",
+    "list": "forever list",
+    "stop": "forever stopall",
+    "init": "node ./createRunConfig.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apvilkko/kotona.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/apvilkko/kotona/issues"
+  },
+  "homepage": "https://github.com/apvilkko/kotona#readme",
+  "dependencies": {
+    "forever": "^0.15.4",
+    "npm-run-all": "^4.1.5"
+  }
+}

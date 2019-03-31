@@ -1,0 +1,16 @@
+[
+  {
+    "uid": "bus",
+    "append": true,
+    "watch": false,
+    "script": "index.js",
+    "sourceDir": "PWD/bus"
+  },
+  {
+    "uid": "commander",
+    "append": true,
+    "watch": false,
+    "script": "api.js",
+    "sourceDir": "PWD/commander/src"
+  }
+]

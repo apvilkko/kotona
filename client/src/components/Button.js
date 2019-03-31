@@ -18,6 +18,7 @@ const ActionButton = styled(BaseButton)`
   box-shadow: 0 0 0.4em rgba(255, 255, 255, 0.4);
   height: 2em;
   box-sizing: border-box;
+  background: ${p => p.color || "transparent"}
 
   &:active {
     border-color: ${p => darken(0.15)(p.theme.colorPrimary)};
