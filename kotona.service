@@ -1,0 +1,12 @@
+[Unit]
+Description=Kotona Service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/projects/kotona
+ExecStart=/home/pi/.nvm/versions/node/v11.12.0/bin/npm start
+Restart=on-failure
+User=pi
+
+[Install]
+WantedBy=multi-user.target
