@@ -89,5 +89,5 @@ http
 console.log(`\n 🗂  Serving files from ./${root} on http://localhost:${port}`);
 console.log(` 🖥  Using ${fallback} as the fallback for route requests`);
 
-const page = `http://localhost:${require("../ports.json").bus}`;
-require("child_process").exec(`chromium-browser --start-fullscreen ${page}`);
+/* const page = `http://localhost:${require("../ports.json").bus}`;
+require("child_process").exec(`chromium-browser --start-fullscreen ${page}`); */
