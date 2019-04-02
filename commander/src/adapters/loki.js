@@ -48,7 +48,7 @@ const syncDevices = (integration, devices) => {
       });
     }
   });
-  console.log(`Synced ${devices.length} devices.`);
+  // console.log(`Synced ${devices.length} devices.`);
 };
 
 const api = { getCollection, saveEntity, deleteEntity, getEntity, syncDevices };

@@ -81,6 +81,24 @@ const startServer = () => {
   app.listen(port);
 };
 
+const POLL_EVERY_MS = 60 * 1000;
+
+const doSync = (integration, key, dbInstance) => {
+  // console.log("Starting sync for", key);
+  integration
+    .getDevices()
+    .then(devices => {
+      dbInstance.syncDevices(key, devices);
+    })
+    .catch(console.error);
+};
+
+const startUpdateLoop = (integration, key, dbInstance) => {
+  setInterval(() => {
+    doSync(integration, key, dbInstance);
+  }, POLL_EVERY_MS);
+};
+
 dbFactory.initialize(dbInstance => {
   console.log("Database ready.");
   integrationsFactory.initialize(data => {
@@ -88,12 +106,8 @@ dbFactory.initialize(dbInstance => {
     console.log("Initialized integrations", Object.keys(integrations));
     Object.keys(integrations).forEach(key => {
       const integration = integrations[key];
-      integration
-        .getDevices()
-        .then(devices => {
-          dbInstance.syncDevices(key, devices);
-        })
-        .catch(console.error);
+      doSync(integration, key, dbInstance);
+      startUpdateLoop(integration, key, dbInstance);
     });
     db = dbInstance;
     startServer();

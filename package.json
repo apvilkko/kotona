@@ -8,7 +8,11 @@
     "start": "npm run init && forever start ./run.json",
     "list": "forever list",
     "stop": "forever stopall",
-    "init": "node ./createRunConfig.js"
+    "init": "node ./createRunConfig.js",
+    "dev:bus": "cd ./bus && npm run dev",
+    "dev:commander": "cd ./commander && npm run dev",
+    "dev:client": "cd ./client && npm start",
+    "dev": "run-p dev:bus dev:commander dev:client"
   },
   "repository": {
     "type": "git",

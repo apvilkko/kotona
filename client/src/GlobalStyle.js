@@ -13,10 +13,10 @@ export default createGlobalStyle`
   body {
     font-family: ${p => p.theme.fontFamily};
     @media screen and (orientation: portrait) {
-      font-size: 4vw;
+      font-size: 5vw;
     }
     @media screen and (orientation: landscape) {
-      font-size: 4vh;
+      font-size: 5vh;
     }
     background: ${p => p.theme.colorBg};
     color: ${p => p.theme.colorPrimary};

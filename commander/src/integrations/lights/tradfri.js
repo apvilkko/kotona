@@ -70,7 +70,7 @@ const execRequest = (command, resolve, reject, parse, tries) => {
 const doRequest = (command, parse = false, delayMs) =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
-      console.log("exec: ", command);
+      // console.log("exec: ", command);
       execRequest(command, resolve, reject, parse, 0);
     }, delayMs || 0);
   });
@@ -122,8 +122,7 @@ const getProp = (obj, path) => {
   return obj[path];
 };
 
-const getType = device => {
-  const model = getProp(device, PROPS.model);
+const getType = model => {
   if (model.includes("panel") || model.includes("bulb")) {
     return "light";
   }
@@ -135,21 +134,27 @@ const getType = device => {
   }
 };
 
-const getState = device => {
-  if (device[ATTR_LIGHT_CONTROL]) {
-    return !!device[ATTR_LIGHT_CONTROL][0][LIGHT_CONTROL.state];
+const getState = (device, model) => {
+  const attr = model.includes("control")
+    ? ATTR_SWITCH_PLUG
+    : ATTR_LIGHT_CONTROL;
+  if (device[attr]) {
+    return !!device[attr][0][LIGHT_CONTROL.state];
   }
   return false;
 };
 
-const transformDevice = device => ({
-  name: getProp(device, PROPS.name),
-  model: getProp(device, PROPS.model),
-  deviceId: getProp(device, PROPS.id),
-  subtype: getType(device),
-  data: device,
-  on: getState(device)
-});
+const transformDevice = device => {
+  const model = getProp(device, PROPS.model);
+  return {
+    name: getProp(device, PROPS.name),
+    model,
+    deviceId: getProp(device, PROPS.id),
+    subtype: getType(model),
+    data: device,
+    on: getState(device, model)
+  };
+};
 
 const getDevices = () => {
   const params = createParams("get");

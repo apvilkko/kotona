@@ -14,8 +14,6 @@ const Opener = styled(({ className, handleClick }) => (
   border: none;
 `;
 
-const isFullscreen = () => 1 >= outerHeight - innerHeight;
-
 const Menu = ({ className }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -33,14 +31,10 @@ const Menu = ({ className }) => {
             <li>
               <Button
                 onClick={() => {
-                  if (isFullscreen()) {
-                    document.exitFullscreen();
-                  } else {
-                    document.documentElement.requestFullscreen();
-                  }
+                  window.location.reload(true);
                 }}
               >
-                fullscreen
+                refresh
               </Button>
             </li>
           </ul>
