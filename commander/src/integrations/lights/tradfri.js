@@ -1,4 +1,5 @@
 const exec = require("child_process").exec;
+const parseCoap = require("./parseCoap");
 
 const DEVICES = 15001;
 const GROUPS = 15004;
@@ -31,25 +32,12 @@ let config = {};
 
 const MAX_TRIES = 3;
 
-const parseResponse = str => {
-  const splitLines = str.split("\n");
-  let goodLine = 0;
-  for (let i = 0; i < splitLines.length; ++i) {
-    const line = splitLines[i];
-    if (line.startsWith("[") || line.startsWith("{")) {
-      goodLine = i;
-      break;
-    }
-  }
-  return JSON.parse(splitLines.filter((x, i) => i >= goodLine).join("\n"));
-};
-
 const execRequest = (command, resolve, reject, parse, tries) => {
   exec(command, { timeout: 4000 }, (err, stdout, stderr) => {
     if (!err) {
       let parsed = stdout;
       try {
-        parsed = parse ? parseResponse(stdout) : stdout;
+        parsed = parse ? parseCoap(stdout)[0] : stdout;
         resolve(parsed);
       } catch (e) {
         reject(e);
@@ -61,7 +49,7 @@ const execRequest = (command, resolve, reject, parse, tries) => {
         console.log("Retrying");
         setTimeout(() => {
           execRequest(command, resolve, reject, parse, tries + 1);
-        }, 300);
+        }, (tries + 1) * 300);
       }
     }
   });
@@ -70,7 +58,7 @@ const execRequest = (command, resolve, reject, parse, tries) => {
 const doRequest = (command, parse = false, delayMs) =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
-      // console.log("exec: ", command);
+      console.log("exec: ", command);
       execRequest(command, resolve, reject, parse, 0);
     }, delayMs || 0);
   });
@@ -159,17 +147,19 @@ const transformDevice = device => {
 const getDevices = () => {
   const params = createParams("get");
   return new Promise((resolve, reject) => {
-    doRequest(`${config.coapClient} ${params}`, true).then(deviceList => {
-      const subRequests = deviceList.map((deviceId, i) => {
-        const params = createParams("get", null, deviceId);
-        return doRequest(`${config.coapClient} ${params}`, true, 10 * i);
-      });
-      Promise.all(subRequests)
-        .then(results => {
-          resolve(results.map(transformDevice));
-        })
-        .catch(reject);
-    });
+    doRequest(`${config.coapClient} ${params}`, true)
+      .then(deviceList => {
+        const subRequests = deviceList.map((deviceId, i) => {
+          const params = createParams("get", null, deviceId);
+          return doRequest(`${config.coapClient} ${params}`, true, 10 * i);
+        });
+        Promise.all(subRequests)
+          .then(results => {
+            resolve(results.map(transformDevice));
+          })
+          .catch(reject);
+      })
+      .catch(reject);
   });
 };
 

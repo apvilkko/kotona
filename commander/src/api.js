@@ -19,12 +19,17 @@ const startServer = () => {
   router.get("/devices", async (req, res) => {
     const integration = "lights/tradfri";
     const dbDevices = db.getCollection(DEVICES);
-    const devices = await integrations[integration].getDevices();
-    const idMap = {};
-    dbDevices.forEach(device => {
-      idMap[device.deviceId] = device.id;
-    });
-    res.json(devices.map(x => ({ ...x, id: idMap[x.deviceId] })));
+    try {
+      const devices = await integrations[integration].getDevices();
+      const idMap = {};
+      dbDevices.forEach(device => {
+        idMap[device.deviceId] = device.id;
+      });
+      res.json(devices.map(x => ({ ...x, id: idMap[x.deviceId] })));
+    } catch (e) {
+      console.error("could not get /devices: ", e);
+      res.sendStatus(400);
+    }
   });
 
   router.post("/devices/:id", async (req, res) => {
@@ -90,7 +95,7 @@ const doSync = (integration, key, dbInstance) => {
     .then(devices => {
       dbInstance.syncDevices(key, devices);
     })
-    .catch(console.error);
+    .catch(e => console.error("doSync error:", e));
 };
 
 const startUpdateLoop = (integration, key, dbInstance) => {
