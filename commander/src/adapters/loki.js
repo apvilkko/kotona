@@ -4,8 +4,11 @@ const uuidv4 = require("uuid/v4");
 
 let db;
 
-const getCollection = collection => {
-  return db.getCollection(collection).data;
+const getCollection = (collection, query) => {
+  if (!query) {
+    return db.getCollection(collection).data;
+  }
+  return db.getCollection(collection).find(query);
 };
 
 const getEntity = (collection, id) => {
@@ -25,6 +28,19 @@ const saveEntity = (collection, entity, insert = false) => {
 const deleteEntity = (collection, id) => {
   if (id) {
     return db.getCollection(collection).findAndRemove({ id });
+  }
+};
+
+const updateDeviceData = (id, device) => {
+  const collection = "entities";
+  const existing = db.getCollection(collection).findOne({ id });
+  if (existing) {
+    saveEntity(collection, {
+      ...existing,
+      name: device.name,
+      data: device.data,
+      on: device.on
+    });
   }
 };
 
@@ -48,10 +64,18 @@ const syncDevices = (integration, devices) => {
       });
     }
   });
-  // console.log(`Synced ${devices.length} devices.`);
+  console.log(`Synced ${devices.length} devices.`);
+  return db.getCollection(collection, { integration }).find();
 };
 
-const api = { getCollection, saveEntity, deleteEntity, getEntity, syncDevices };
+const api = {
+  getCollection,
+  saveEntity,
+  deleteEntity,
+  getEntity,
+  syncDevices,
+  updateDeviceData
+};
 
 const initLoki = (collections, done) => () => {
   collections.forEach(collection => {

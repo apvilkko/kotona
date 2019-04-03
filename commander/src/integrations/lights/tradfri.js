@@ -1,4 +1,5 @@
 const exec = require("child_process").exec;
+const spawn = require("child_process").spawn;
 const parseCoap = require("./parseCoap");
 
 const DEVICES = 15001;
@@ -32,6 +33,30 @@ let config = {};
 
 const MAX_TRIES = 3;
 
+const transformDevice = device => {
+  const model = getProp(device, PROPS.model);
+  return {
+    name: getProp(device, PROPS.name),
+    model,
+    deviceId: getProp(device, PROPS.id),
+    subtype: getType(model),
+    data: device,
+    on: getState(device, model)
+  };
+};
+
+const streamProcessOutput = (command, args, callbacks) => {
+  const child = spawn(`${command} ${args.join(" ")}`, [], { shell: true });
+  child.stdout.on("data", callbacks.onData);
+  child.stdout.on("end", callbacks.onData);
+  child.stderr.on("data", callbacks.onError);
+  child.on("close", callbacks.onClose);
+  child.on("error", callbacks.onClose);
+  return child;
+};
+
+const ONE_SHOT_RETRY_MS = 1000;
+
 const execRequest = (command, resolve, reject, parse, tries) => {
   exec(command, { timeout: 4000 }, (err, stdout, stderr) => {
     if (!err) {
@@ -49,7 +74,7 @@ const execRequest = (command, resolve, reject, parse, tries) => {
         console.log("Retrying");
         setTimeout(() => {
           execRequest(command, resolve, reject, parse, tries + 1);
-        }, (tries + 1) * 300);
+        }, (tries + 1) * ONE_SHOT_RETRY_MS);
       }
     }
   });
@@ -58,7 +83,7 @@ const execRequest = (command, resolve, reject, parse, tries) => {
 const doRequest = (command, parse = false, delayMs) =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
-      console.log("exec: ", command);
+      // console.log("exec: ", command);
       execRequest(command, resolve, reject, parse, 0);
     }, delayMs || 0);
   });
@@ -89,14 +114,34 @@ const createPayload = (command, value) => {
   };
 };
 
-const createParams = (method, payload, deviceId) =>
-  `-m ${method} -u "${config.username}" -k "${config.key}" ${
-    payload ? "-e '" + JSON.stringify(payload) + "'" : ""
-  } "${getUri(config.gatewayIp, deviceId)}"`;
+const createParamList = (method, payload, observe) => {
+  const ret = [
+    "-m",
+    method,
+    "-u",
+    `"${config.username}"`,
+    "-k",
+    `"${config.key}"`
+  ];
+  if (payload) {
+    ret.push("-e");
+    ret.push(`'${JSON.stringify(payload)}'`);
+  }
+  if (observe) {
+    ret.push("-s");
+    ret.push("1");
+  }
+  return ret;
+};
+
+const createParams = (method, payload, deviceId, observe) => {
+  const paramString = createParamList(method, payload, observe).join(" ");
+  return `${paramString} "${getUri(config.gatewayIp, deviceId)}"`;
+};
 
 const setDeviceState = (deviceId, parameter, value) => {
   const params = createParams("put", createPayload(parameter, value), deviceId);
-  console.log("setDeviceState", deviceId, parameter, value);
+  console.log("setDeviceState", deviceId, parameter, value, params);
   return doRequest(`${config.coapClient} ${params}`);
 };
 
@@ -132,18 +177,6 @@ const getState = (device, model) => {
   return false;
 };
 
-const transformDevice = device => {
-  const model = getProp(device, PROPS.model);
-  return {
-    name: getProp(device, PROPS.name),
-    model,
-    deviceId: getProp(device, PROPS.id),
-    subtype: getType(model),
-    data: device,
-    on: getState(device, model)
-  };
-};
-
 const getDevices = () => {
   const params = createParams("get");
   return new Promise((resolve, reject) => {
@@ -163,7 +196,32 @@ const getDevices = () => {
   });
 };
 
-const api = { getDevices, setDeviceState };
+const startObserving = (deviceId, onData, onClose) => {
+  const command = config.coapClient;
+  const args = createParamList("get", null, true);
+  args.push(`"${getUri(config.gatewayIp, deviceId)}"`);
+  return streamProcessOutput(command, args, {
+    onData: buffer => {
+      if (!buffer) return;
+      const data = buffer.toString();
+      const parsed = parseCoap(data);
+      if (parsed.length) {
+        onData(transformDevice(parsed[parsed.length - 1]));
+      }
+    },
+    onError: data => {
+      const str = data.toString();
+      if ((str.length > 2 && str.startsWith("v:")) || str.length <= 2) {
+        // ignore, this is normal data
+      } else {
+        console.error("observe", deviceId, str);
+      }
+    },
+    onClose
+  });
+};
+
+const api = { getDevices, setDeviceState, startObserving };
 
 const initialize = (conf, done) => {
   config = conf;

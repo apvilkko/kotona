@@ -1,8 +1,9 @@
-const dbFactory = require("./db");
-const integrationsFactory = require("./integrations/index");
 const express = require("express");
 const bodyParser = require("body-parser");
 const router = require("express-promise-router")();
+const kill = require("tree-kill");
+const dbFactory = require("./db");
+const integrationsFactory = require("./integrations/index");
 
 const PORTS = require("../../ports");
 const port = PORTS.commander;
@@ -11,31 +12,63 @@ const COMMANDS = "commands";
 const DEVICES = "entities";
 let integrations = {};
 let db = null;
+const observed = {};
+
+const startListeningDevice = (integration, key, dbInstance, device) => {
+  const onData = data => {
+    dbInstance.updateDeviceData(device.id, data);
+  };
+  const onClose = code => {
+    console.log("close code", code, key, device.deviceId);
+    setTimeout(() => {
+      // restart listening
+      startListener();
+    }, 10000);
+  };
+  function startListener() {
+    console.log("Start listening", device.id, device.deviceId);
+    observed[key][device.id] = integration.startObserving(
+      device.deviceId,
+      onData,
+      onClose
+    );
+  }
+  startListener();
+};
+
+const startListening = (integration, key, dbInstance, devices) => {
+  devices.forEach(device =>
+    startListeningDevice(integration, key, dbInstance, device)
+  );
+};
+
+const stopListening = (integration, dbId) =>
+  new Promise((resolve, reject) => {
+    const child = observed[integration][dbId];
+    if (!child) {
+      resolve();
+      return;
+    }
+    kill(child.pid, err => {
+      observed[integration][dbId] = null;
+      console.log("killed", child.pid);
+      resolve();
+    });
+  });
 
 const startServer = () => {
   const app = express();
   app.use(bodyParser.json());
 
-  router.get("/devices", async (req, res) => {
-    const integration = "lights/tradfri";
+  router.get("/devices", (req, res) => {
     const dbDevices = db.getCollection(DEVICES);
-    try {
-      const devices = await integrations[integration].getDevices();
-      const idMap = {};
-      dbDevices.forEach(device => {
-        idMap[device.deviceId] = device.id;
-      });
-      res.json(devices.map(x => ({ ...x, id: idMap[x.deviceId] })));
-    } catch (e) {
-      console.error("could not get /devices: ", e);
-      res.sendStatus(400);
-    }
+    res.json(dbDevices);
   });
 
   router.post("/devices/:id", async (req, res) => {
     const dbDevice = db.getEntity(DEVICES, req.params.id);
     const integration = "lights/tradfri";
-    console.log("body", req.body);
+    await stopListening(integration, dbDevice.id);
     try {
       await integrations[integration].setDeviceState(
         dbDevice.deviceId,
@@ -86,22 +119,19 @@ const startServer = () => {
   app.listen(port);
 };
 
-const POLL_EVERY_MS = 60 * 1000;
-
-const doSync = (integration, key, dbInstance) => {
+const doSync = (integration, key, dbInstance, cb) => {
   // console.log("Starting sync for", key);
+  let savedDevices = [];
   integration
     .getDevices()
     .then(devices => {
-      dbInstance.syncDevices(key, devices);
+      savedDevices = dbInstance.syncDevices(key, devices);
+      cb(savedDevices);
     })
-    .catch(e => console.error("doSync error:", e));
-};
-
-const startUpdateLoop = (integration, key, dbInstance) => {
-  setInterval(() => {
-    doSync(integration, key, dbInstance);
-  }, POLL_EVERY_MS);
+    .catch(e => {
+      console.error("doSync error:", e);
+      cb([]);
+    });
 };
 
 dbFactory.initialize(dbInstance => {
@@ -110,9 +140,13 @@ dbFactory.initialize(dbInstance => {
     integrations = data;
     console.log("Initialized integrations", Object.keys(integrations));
     Object.keys(integrations).forEach(key => {
+      observed[key] = {};
       const integration = integrations[key];
-      doSync(integration, key, dbInstance);
-      startUpdateLoop(integration, key, dbInstance);
+      doSync(integration, key, dbInstance, devices => {
+        setTimeout(() => {
+          startListening(integration, key, dbInstance, devices);
+        }, 2000);
+      });
     });
     db = dbInstance;
     startServer();
