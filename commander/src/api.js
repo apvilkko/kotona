@@ -16,6 +16,7 @@ const observed = {};
 
 const startListeningDevice = (integration, key, dbInstance, device) => {
   const onData = data => {
+    // console.log("update", device.id, device.deviceId, data);
     dbInstance.updateDeviceData(device.id, data);
   };
   const onClose = code => {
@@ -23,7 +24,7 @@ const startListeningDevice = (integration, key, dbInstance, device) => {
     setTimeout(() => {
       // restart listening
       startListener();
-    }, 10000);
+    }, 10000 + Math.random() * 10000);
   };
   function startListener() {
     console.log("Start listening", device.id, device.deviceId);
@@ -37,8 +38,13 @@ const startListeningDevice = (integration, key, dbInstance, device) => {
 };
 
 const startListening = (integration, key, dbInstance, devices) => {
-  devices.forEach(device =>
-    startListeningDevice(integration, key, dbInstance, device)
+  devices.forEach((device, i) =>
+    setTimeout(() => {
+      startListeningDevice(integration, key, dbInstance, device);
+      setTimeout(() => {
+        stopListening(key, device.id);
+      }, 5000 + Math.random() * 20000);
+    }, i * 500)
   );
 };
 
@@ -67,13 +73,22 @@ const startServer = () => {
 
   router.post("/devices/:id", async (req, res) => {
     const dbDevice = db.getEntity(DEVICES, req.params.id);
+    if (!dbDevice) {
+      res.sendStatus(400);
+      return;
+    }
     const integration = "lights/tradfri";
     await stopListening(integration, dbDevice.id);
+    if (req.body.id) {
+      delete req.body.id;
+    }
+    const key = Object.keys(req.body)[0];
+    const value = Object.values(req.body)[0];
     try {
-      await integrations[integration].setDeviceState(
+      const result = await integrations[integration].setDeviceState(
         dbDevice.deviceId,
-        Object.keys(req.body)[0],
-        Object.values(req.body)[0]
+        key,
+        value
       );
       res.sendStatus(200);
     } catch (e) {

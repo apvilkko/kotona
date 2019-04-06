@@ -3,10 +3,39 @@ import styled from "styled-components";
 import Button from "./components/Button";
 import LabeledInput from "./components/LabeledInput";
 import useFetch from "./useFetch";
+import throttle from "./throttle";
+
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
+const StyledRange = styled("input")`
+  -webkit-appearance: none !important;
+  border: 1px solid white;
+  background: #222;
+  height: 2.5em;
+  width: 15em;
+`;
 
 const DeviceControl = ({ device, setPendingReload, className }) => {
   const { doRequest, isLoading, data } = useFetch();
   const [request, setRequest] = useState({});
+  const [rangeValue, setRangeValue] = useState(device.brightness);
+  const [isOn, setIsOn] = useState(device.on);
+  const prevIsOn = usePrevious(isOn);
+
+  const throttled = useRef(
+    throttle(newValue => {
+      if (newValue !== device.brightness) {
+        setRequest({ id: device.id, dimmer: newValue });
+      }
+    }, 500)
+  );
+  useEffect(() => throttled.current(rangeValue), [rangeValue]);
 
   useEffect(
     () => {
@@ -14,11 +43,20 @@ const DeviceControl = ({ device, setPendingReload, className }) => {
         doRequest({
           method: "post",
           url: `/api/devices/${request.id}`,
-          body: { state: request.state }
+          body: request
         });
       }
     },
     [request]
+  );
+
+  useEffect(
+    () => {
+      if (prevIsOn !== undefined) {
+        setRequest({ id: device.id, state: !device.on });
+      }
+    },
+    [isOn]
   );
 
   useEffect(
@@ -32,12 +70,16 @@ const DeviceControl = ({ device, setPendingReload, className }) => {
 
   return (
     <div className={className}>
-      <Button
-        color={device.on ? "green" : ""}
-        onClick={() => setRequest({ id: device.id, state: !device.on })}
-      >
+      <Button color={isOn ? "green" : ""} onClick={() => setIsOn(!isOn)}>
         {device.name}
       </Button>
+      <StyledRange
+        type="range"
+        min="0"
+        max="100"
+        value={rangeValue}
+        onChange={e => setRangeValue(e.target.value)}
+      />
     </div>
   );
 };

@@ -33,6 +33,20 @@ let config = {};
 
 const MAX_TRIES = 3;
 
+const getState = (device, model, prop) => {
+  const attr = model.includes("control")
+    ? ATTR_SWITCH_PLUG
+    : ATTR_LIGHT_CONTROL;
+  if (device[attr]) {
+    const p = prop || LIGHT_CONTROL.state;
+    const val = device[attr][0][p];
+    return p === LIGHT_CONTROL.state ? !!val : val;
+  }
+  return false;
+};
+
+const clamp = (val, newMax, max) => (val * newMax) / max;
+
 const transformDevice = device => {
   const model = getProp(device, PROPS.model);
   return {
@@ -41,7 +55,8 @@ const transformDevice = device => {
     deviceId: getProp(device, PROPS.id),
     subtype: getType(model),
     data: device,
-    on: getState(device, model)
+    on: getState(device, model),
+    brightness: clamp(getState(device, model, LIGHT_CONTROL.dimmer), 100, 254)
   };
 };
 
@@ -140,8 +155,12 @@ const createParams = (method, payload, deviceId, observe) => {
 };
 
 const setDeviceState = (deviceId, parameter, value) => {
-  const params = createParams("put", createPayload(parameter, value), deviceId);
-  console.log("setDeviceState", deviceId, parameter, value, params);
+  let val = value;
+  if (parameter === "dimmer") {
+    val = Math.round((Number(value) / 100) * 254);
+  }
+  const params = createParams("put", createPayload(parameter, val), deviceId);
+  console.log("setDeviceState", deviceId, parameter, val, params);
   return doRequest(`${config.coapClient} ${params}`);
 };
 
@@ -165,16 +184,6 @@ const getType = model => {
   if (model.includes("control")) {
     return "switch";
   }
-};
-
-const getState = (device, model) => {
-  const attr = model.includes("control")
-    ? ATTR_SWITCH_PLUG
-    : ATTR_LIGHT_CONTROL;
-  if (device[attr]) {
-    return !!device[attr][0][LIGHT_CONTROL.state];
-  }
-  return false;
 };
 
 const getDevices = () => {
@@ -202,6 +211,7 @@ const startObserving = (deviceId, onData, onClose) => {
   args.push(`"${getUri(config.gatewayIp, deviceId)}"`);
   return streamProcessOutput(command, args, {
     onData: buffer => {
+      // console.log("onData", buffer);
       if (!buffer) return;
       const data = buffer.toString();
       const parsed = parseCoap(data);

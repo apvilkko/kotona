@@ -39,7 +39,8 @@ const updateDeviceData = (id, device) => {
       ...existing,
       name: device.name,
       data: device.data,
-      on: device.on
+      on: device.on,
+      brightness: device.brightness
     });
   }
 };
