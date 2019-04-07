@@ -4,14 +4,7 @@ import Button from "./components/Button";
 import LabeledInput from "./components/LabeledInput";
 import useFetch from "./useFetch";
 import throttle from "./throttle";
-
-function usePrevious(value) {
-  const ref = useRef();
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
-}
+import isEqual from "./isEqual";
 
 const StyledRange = styled("input")`
   -webkit-appearance: none !important;
@@ -21,30 +14,78 @@ const StyledRange = styled("input")`
   width: 15em;
 `;
 
+const deviceState = device => ({
+  on: device.on,
+  brightness: Math.round(device.brightness)
+});
+
 const DeviceControl = ({ device, setPendingReload, className }) => {
   const { doRequest, isLoading, data } = useFetch();
   const [request, setRequest] = useState({});
-  const [rangeValue, setRangeValue] = useState(device.brightness);
-  const [isOn, setIsOn] = useState(device.on);
-  const prevIsOn = usePrevious(isOn);
+  const initState = deviceState(device);
+  const [currentState, setCurrentState] = useState(initState);
+  const [desiredState, setDesiredState] = useState(initState);
+  const [uiState, setUiState] = useState(initState);
+  const [uiRequestPending, setUiRequestPending] = useState(false);
 
   const throttled = useRef(
     throttle(newValue => {
-      if (newValue !== device.brightness) {
-        setRequest({ id: device.id, dimmer: newValue });
-      }
+      setDesiredState(desiredState => {
+        // console.log("throttle", newValue, desiredState);
+        const rounded = Math.round(newValue);
+        if (rounded !== desiredState.brightness) {
+          // console.log("set desired brightness", rounded);
+          return {
+            ...desiredState,
+            brightness: rounded
+          };
+        }
+        return desiredState;
+      });
     }, 500)
   );
-  useEffect(() => throttled.current(rangeValue), [rangeValue]);
 
   useEffect(
     () => {
+      // throttle dimmer control
+      throttled.current(uiState.brightness);
+
+      if (uiState.on !== desiredState.on) {
+        setDesiredState({
+          ...desiredState,
+          on: uiState.on
+        });
+      }
+    },
+    [uiState]
+  );
+
+  // update device data from backend
+  useEffect(
+    () => {
+      const newState = deviceState(device);
+      // console.log("set current from backend");
+      setCurrentState(newState);
+      setDesiredState(newState);
+      setUiState(newState);
+      setTimeout(() => {
+        setUiRequestPending(false);
+      }, 400);
+    },
+    [device]
+  );
+
+  // send change request to backend
+  useEffect(
+    () => {
       if (request && request.id) {
+        // console.log("request", request);
         doRequest({
           method: "post",
           url: `/api/devices/${request.id}`,
           body: request
         });
+        setUiRequestPending(true);
       }
     },
     [request]
@@ -52,17 +93,28 @@ const DeviceControl = ({ device, setPendingReload, className }) => {
 
   useEffect(
     () => {
-      if (prevIsOn !== undefined) {
-        setRequest({ id: device.id, state: !device.on });
+      if (!uiRequestPending && !isEqual(desiredState, currentState)) {
+        // console.log("desiredState change", desiredState);
+        let handled = false;
+        if (Math.abs(desiredState.brightness - currentState.brightness) > 1) {
+          setRequest({ id: device.id, dimmer: desiredState.brightness });
+          handled = true;
+        }
+        if (!handled && desiredState.on !== currentState.on) {
+          setRequest({ id: device.id, state: desiredState.on });
+        }
       }
     },
-    [isOn]
+    [desiredState]
   );
 
+  // reload data when change requests complete
   useEffect(
     () => {
       if (request.id && !isLoading) {
-        setPendingReload(new Date().getTime());
+        setTimeout(() => {
+          setPendingReload(new Date().getTime());
+        }, 1000);
       }
     },
     [data, isLoading]
@@ -70,15 +122,18 @@ const DeviceControl = ({ device, setPendingReload, className }) => {
 
   return (
     <div className={className}>
-      <Button color={isOn ? "green" : ""} onClick={() => setIsOn(!isOn)}>
+      <Button
+        color={uiState.on ? "green" : ""}
+        onClick={() => setUiState({ ...uiState, on: !uiState.on })}
+      >
         {device.name}
       </Button>
       <StyledRange
         type="range"
         min="0"
         max="100"
-        value={rangeValue}
-        onChange={e => setRangeValue(e.target.value)}
+        value={uiState.brightness}
+        onChange={e => setUiState({ ...uiState, brightness: e.target.value })}
       />
     </div>
   );
@@ -125,28 +180,50 @@ const useInterval = (callback, delay) => {
   );
 };
 
-const POLL_TIME = 29 * 1000;
+const POLL_TIME = 15 * 1000;
+
+const socket = new WebSocket(`ws://${window.location.host}/ws/update`);
 
 export default () => {
   const [lightsOnly, setLightsOnly] = useState(true);
-  const { doFetch, data } = useFetch();
+  const { doFetch, data, setData } = useFetch();
   const [filtered, setFiltered] = useState([]);
   const [pendingReload, setPendingReload] = useState(false);
+  const [message, setMessage] = useState({});
 
   const fetchAll = useCallback(() => {
     doFetch("/api/devices");
   });
 
+  useEffect(() => {
+    fetchAll();
+    socket.addEventListener("open", evt => {
+      console.log("socket opened", evt);
+    });
+    socket.addEventListener("message", evt => {
+      if (evt && evt.data) {
+        const jsonData = JSON.parse(evt.data);
+        if (jsonData.id) {
+          // console.log("set data from update");
+          setMessage(jsonData);
+        }
+      }
+    });
+  }, []);
+
   useEffect(
     () => {
-      fetchAll();
+      setData(data => {
+        if (data) {
+          const id = message.id;
+          const index = data.findIndex(item => item.id === id);
+          return [...data.slice(0, index), message, ...data.slice(index + 1)];
+        }
+        return data;
+      });
     },
-    [pendingReload]
+    [message]
   );
-
-  useInterval(() => {
-    fetchAll();
-  }, POLL_TIME);
 
   useEffect(
     () => {

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node ./bundler.js",
     "build": "rimraf dist && NODE_ENV=production node ./bundler.js && mkdir dist/ui && mv dist/src* dist/ui",
-    "serve": "node ./serve.js"
+    "serve": "node ./serve.js",
+    "test": "jest src"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,8 @@
     "@babel/core": "^7.4.0",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/plugin-transform-runtime": "^7.4.0",
+    "babel-jest": "^24.7.1",
+    "jest": "^24.7.1",
     "rimraf": "^2.6.3"
   }
 }

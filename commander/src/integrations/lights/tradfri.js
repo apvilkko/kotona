@@ -160,7 +160,7 @@ const setDeviceState = (deviceId, parameter, value) => {
     val = Math.round((Number(value) / 100) * 254);
   }
   const params = createParams("put", createPayload(parameter, val), deviceId);
-  console.log("setDeviceState", deviceId, parameter, val, params);
+  // console.log("setDeviceState", deviceId, parameter, val, params);
   return doRequest(`${config.coapClient} ${params}`);
 };
 

@@ -6,6 +6,7 @@ const port = PORTS.bus;
 const uiPath = "ui";
 const config = {
   api: { host: "localhost", port: PORTS.commander, removePath: true },
+  ws: { host: "localhost", port: PORTS.commander, removePath: true, ws: true },
   [uiPath]: { host: "localhost", port: PORTS.client }
 };
 
@@ -20,7 +21,8 @@ Object.keys(config).forEach(key => {
             [`^/${key}`]: ""
           }
         : null,
-      logLevel: "debug"
+      logLevel: "debug",
+      ws: config[key].ws
     })
   );
 });

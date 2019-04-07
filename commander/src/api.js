@@ -13,18 +13,30 @@ const DEVICES = "entities";
 let integrations = {};
 let db = null;
 const observed = {};
+const socket = {};
 
 const startListeningDevice = (integration, key, dbInstance, device) => {
   const onData = data => {
     // console.log("update", device.id, device.deviceId, data);
-    dbInstance.updateDeviceData(device.id, data);
+    const updated = dbInstance.updateDeviceData(device.id, data);
+    if (socket.ws && updated) {
+      console.log("update", device.id, device.deviceId);
+      socket.ws.send(JSON.stringify(updated));
+    }
   };
   const onClose = code => {
-    console.log("close code", code, key, device.deviceId);
+    let delay = 1000 + Math.random() * 5000;
+    if (
+      observed[key][device.id] &&
+      observed[key][device.id].restartImmediately
+    ) {
+      delay = 100;
+    }
+    console.log("close", code, key, device.deviceId, delay);
     setTimeout(() => {
       // restart listening
       startListener();
-    }, 10000 + Math.random() * 10000);
+    }, delay);
   };
   function startListener() {
     console.log("Start listening", device.id, device.deviceId);
@@ -44,19 +56,23 @@ const startListening = (integration, key, dbInstance, devices) => {
       setTimeout(() => {
         stopListening(key, device.id);
       }, 5000 + Math.random() * 20000);
+      setInterval(() => {
+        console.log("interval refresh listener");
+        stopListening(key, device.id);
+      }, 5 * 60 * 1000 + Math.random() * 30000);
     }, i * 500)
   );
 };
 
-const stopListening = (integration, dbId) =>
+const stopListening = (integration, dbId, restartImmediately) =>
   new Promise((resolve, reject) => {
     const child = observed[integration][dbId];
-    if (!child) {
+    if (!child || !child.pid) {
       resolve();
       return;
     }
     kill(child.pid, err => {
-      observed[integration][dbId] = null;
+      observed[integration][dbId] = { restartImmediately };
       console.log("killed", child.pid);
       resolve();
     });
@@ -64,6 +80,7 @@ const stopListening = (integration, dbId) =>
 
 const startServer = () => {
   const app = express();
+  const expressWs = require("express-ws")(app);
   app.use(bodyParser.json());
 
   router.get("/devices", (req, res) => {
@@ -78,7 +95,7 @@ const startServer = () => {
       return;
     }
     const integration = "lights/tradfri";
-    await stopListening(integration, dbDevice.id);
+    await stopListening(integration, dbDevice.id, true);
     if (req.body.id) {
       delete req.body.id;
     }
@@ -90,6 +107,7 @@ const startServer = () => {
         key,
         value
       );
+      // console.log("setDeviceState result", result);
       res.sendStatus(200);
     } catch (e) {
       console.error(e);
@@ -127,6 +145,14 @@ const startServer = () => {
       console.error(e);
       res.sendStatus(400);
     }
+  });
+
+  router.ws("/update", (ws, req) => {
+    socket.ws = ws;
+    ws.on("message", msg => {
+      console.log("ws message");
+      ws.send(msg);
+    });
   });
 
   app.use(router);

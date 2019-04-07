@@ -47,5 +47,5 @@ export default () => {
     doRequest({ method: "get", url });
   };
 
-  return { data, isLoading, error, doFetch, doRequest };
+  return { data, isLoading, error, doFetch, doRequest, setData };
 };

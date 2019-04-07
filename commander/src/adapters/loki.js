@@ -33,16 +33,20 @@ const deleteEntity = (collection, id) => {
 
 const updateDeviceData = (id, device) => {
   const collection = "entities";
+  // console.log("update", device);
   const existing = db.getCollection(collection).findOne({ id });
   if (existing) {
-    saveEntity(collection, {
+    const newData = {
       ...existing,
       name: device.name,
       data: device.data,
       on: device.on,
       brightness: device.brightness
-    });
+    };
+    saveEntity(collection, newData);
+    return newData;
   }
+  return null;
 };
 
 const syncDevices = (integration, devices) => {
