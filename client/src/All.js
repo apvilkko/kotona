@@ -207,7 +207,7 @@ const useInterval = (callback, delay) => {
 
 const POLL_TIME = 15 * 1000;
 
-const socket = new WebSocket(`ws://${window.location.host}/ws/update`);
+let socket = null;
 
 export default () => {
   const [lightsOnly, setLightsOnly] = useState(true);
@@ -220,8 +220,8 @@ export default () => {
     doFetch("/api/devices");
   });
 
-  useEffect(() => {
-    fetchAll();
+  const openWs = useCallback(() => {
+    socket = new WebSocket(`ws://${window.location.host}/ws/update`);
     socket.addEventListener("open", evt => {
       console.log("socket opened", evt);
     });
@@ -234,6 +234,21 @@ export default () => {
         }
       }
     });
+    socket.addEventListener("close", () => {
+      console.log("ws close, reloading");
+      setTimeout(() => {
+        window.location.reload(false);
+      }, 1000);
+    });
+    socket.addEventListener("error", e => {
+      console.log("ws error", e);
+      socket.close();
+    });
+  });
+
+  useEffect(() => {
+    fetchAll();
+    openWs();
   }, []);
 
   useEffect(
