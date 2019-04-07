@@ -41,7 +41,8 @@ const updateDeviceData = (id, device) => {
       name: device.name,
       data: device.data,
       on: device.on,
-      brightness: device.brightness
+      brightness: device.brightness,
+      color: device.color
     };
     saveEntity(collection, newData);
     return newData;

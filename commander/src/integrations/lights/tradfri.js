@@ -56,7 +56,8 @@ const transformDevice = device => {
     subtype: getType(model),
     data: device,
     on: getState(device, model),
-    brightness: clamp(getState(device, model, LIGHT_CONTROL.dimmer), 100, 254)
+    brightness: clamp(getState(device, model, LIGHT_CONTROL.dimmer), 100, 254),
+    color: getState(device, model, LIGHT_CONTROL.color)
   };
 };
 

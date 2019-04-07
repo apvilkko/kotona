@@ -5,6 +5,8 @@ import LabeledInput from "./components/LabeledInput";
 import useFetch from "./useFetch";
 import throttle from "./throttle";
 import isEqual from "./isEqual";
+import { getColorChoices } from "./integrations/lights/tradfri";
+import ColorChanger from "./ColorChanger";
 
 const StyledRange = styled("input")`
   -webkit-appearance: none !important;
@@ -16,7 +18,8 @@ const StyledRange = styled("input")`
 
 const deviceState = device => ({
   on: device.on,
-  brightness: Math.round(device.brightness)
+  brightness: Math.round(device.brightness),
+  color: device.color
 });
 
 const DeviceControl = ({ device, setPendingReload, className }) => {
@@ -27,6 +30,7 @@ const DeviceControl = ({ device, setPendingReload, className }) => {
   const [desiredState, setDesiredState] = useState(initState);
   const [uiState, setUiState] = useState(initState);
   const [uiRequestPending, setUiRequestPending] = useState(false);
+  const [colors, setColors] = useState(getColorChoices(device));
 
   const throttled = useRef(
     throttle(newValue => {
@@ -50,6 +54,12 @@ const DeviceControl = ({ device, setPendingReload, className }) => {
       // throttle dimmer control
       throttled.current(uiState.brightness);
 
+      if (uiState.color !== desiredState.color) {
+        setDesiredState({
+          ...desiredState,
+          color: uiState.color
+        });
+      }
       if (uiState.on !== desiredState.on) {
         setDesiredState({
           ...desiredState,
@@ -100,6 +110,10 @@ const DeviceControl = ({ device, setPendingReload, className }) => {
           setRequest({ id: device.id, dimmer: desiredState.brightness });
           handled = true;
         }
+        if (!handled && desiredState.color !== currentState.color) {
+          setRequest({ id: device.id, color: desiredState.color });
+          handled = true;
+        }
         if (!handled && desiredState.on !== currentState.on) {
           setRequest({ id: device.id, state: desiredState.on });
         }
@@ -135,12 +149,23 @@ const DeviceControl = ({ device, setPendingReload, className }) => {
         value={uiState.brightness}
         onChange={e => setUiState({ ...uiState, brightness: e.target.value })}
       />
+      <ColorChanger
+        colors={colors}
+        value={uiState.color}
+        handleChange={color => setUiState({ ...uiState, color })}
+      />
     </div>
   );
 };
 
 const StyledDeviceControl = styled(DeviceControl)`
   margin-bottom: 0.2em;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  & > * {
+    margin-left: 0.5em;
+  }
 `;
 
 const Filters = ({ className, lightsOnly, setLightsOnly }) => (
