@@ -25,14 +25,18 @@ const startListeningDevice = (integration, key, dbInstance, device) => {
     }
   };
   const onClose = code => {
-    let delay = 1000 + Math.random() * 5000;
+    let delay = 1000 + Math.round(Math.random() * 5000);
     if (
       observed[key][device.id] &&
       observed[key][device.id].restartImmediately
     ) {
       delay = 100;
     }
-    console.log("close", code, key, device.deviceId, delay);
+    if (code === 0) {
+      // process exited so probably some kind of problem
+      delay = 10 * 60 * 1000;
+    }
+    console.log("close", code, key, delay);
     setTimeout(() => {
       // restart listening
       startListener();
@@ -49,19 +53,39 @@ const startListeningDevice = (integration, key, dbInstance, device) => {
   startListener();
 };
 
+const getRefreshDelay = date => {
+  const hour = (date || new Date()).getHours();
+  // TODO "quiet hours" in config
+  const randomPart = Math.round(Math.random() * 30000);
+  return hour >= 23 && hour < 6
+    ? 15 * 60 * 1000 + randomPart
+    : 5 * 60 * 1000 + randomPart;
+};
+
+// TODO move logic to integration
+const shouldListen = device => {
+  return device.subtype === "light" || device.subtype === "outlet";
+};
+
 const startListening = (integration, key, dbInstance, devices) => {
-  devices.forEach((device, i) =>
-    setTimeout(() => {
-      startListeningDevice(integration, key, dbInstance, device);
+  devices.forEach((device, i) => {
+    if (shouldListen(device)) {
       setTimeout(() => {
-        stopListening(key, device.id);
-      }, 5000 + Math.random() * 20000);
-      setInterval(() => {
-        console.log("interval refresh listener");
-        stopListening(key, device.id);
-      }, 5 * 60 * 1000 + Math.random() * 30000);
-    }, i * 500)
-  );
+        startListeningDevice(integration, key, dbInstance, device);
+        setTimeout(() => {
+          stopListening(key, device.id);
+        }, 10000 + Math.random() * 30000);
+        const refreshByInterval = delay => {
+          setTimeout(() => {
+            console.log("interval refresh listener");
+            stopListening(key, device.id);
+            refreshByInterval(getRefreshDelay());
+          }, delay);
+        };
+        refreshByInterval(getRefreshDelay());
+      }, i * 500);
+    }
+  });
 };
 
 const stopListening = (integration, dbId, restartImmediately) =>
@@ -71,7 +95,7 @@ const stopListening = (integration, dbId, restartImmediately) =>
       resolve();
       return;
     }
-    kill(child.pid, err => {
+    kill(child.pid, "SIGINT", err => {
       observed[integration][dbId] = { restartImmediately };
       console.log("killed", child.pid);
       resolve();
@@ -152,6 +176,10 @@ const startServer = () => {
     ws.on("message", msg => {
       console.log("ws message");
       ws.send(msg);
+    });
+    ws.on("error", msg => {
+      console.log("ws error", msg);
+      ws.close();
     });
   });
 

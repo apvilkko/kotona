@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Closer from "./components/Closer";
+import ClickOutside from "./components/ClickOutside";
 
 const Color = styled("button")`
   height: 3rem;
@@ -53,19 +54,21 @@ export default ({ colors, value, handleChange }) => {
         style={{ background: `#${value}` }}
       />
       {modalOpen ? (
-        <Modal>
-          <ColorSelect>
-            {colors.map(color => (
-              <Color
-                key={color}
-                type="button"
-                onClick={() => handleChange(color)}
-                style={getStyle(color, value)}
-              />
-            ))}
-          </ColorSelect>
-          <Closer handleClick={() => setModalOpen(close)} />
-        </Modal>
+        <ClickOutside onClick={() => setModalOpen(false)}>
+          <Modal>
+            <ColorSelect>
+              {colors.map(color => (
+                <Color
+                  key={color}
+                  type="button"
+                  onClick={() => handleChange(color)}
+                  style={getStyle(color, value)}
+                />
+              ))}
+            </ColorSelect>
+            <Closer handleClick={() => setModalOpen(close)} />
+          </Modal>
+        </ClickOutside>
       ) : null}
     </span>
   );

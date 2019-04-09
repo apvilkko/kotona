@@ -3,6 +3,7 @@ import { NavLink, Switch, Route } from "react-router-dom";
 import styled from "styled-components";
 import Closer from "./components/Closer";
 import Button, { BaseButton } from "./components/Button";
+import ClickOutside from "./components/ClickOutside";
 import t from "./i18n";
 import PAGES from "./pages";
 
@@ -20,25 +21,27 @@ const Menu = ({ className }) => {
   return (
     <div className={className}>
       {menuOpen ? (
-        <div>
-          <Closer handleClick={() => setMenuOpen(false)} />
-          <ul>
-            {PAGES.map(page => (
-              <li key={page.path}>
-                <NavLink to={page.path}>{t(page.label)}</NavLink>
+        <ClickOutside onClick={() => setMenuOpen(false)}>
+          <div>
+            <Closer handleClick={() => setMenuOpen(false)} />
+            <ul>
+              {PAGES.map(page => (
+                <li key={page.path}>
+                  <NavLink to={page.path}>{t(page.label)}</NavLink>
+                </li>
+              ))}
+              <li>
+                <Button
+                  onClick={() => {
+                    window.location.reload(true);
+                  }}
+                >
+                  refresh
+                </Button>
               </li>
-            ))}
-            <li>
-              <Button
-                onClick={() => {
-                  window.location.reload(true);
-                }}
-              >
-                refresh
-              </Button>
-            </li>
-          </ul>
-        </div>
+            </ul>
+          </div>
+        </ClickOutside>
       ) : (
         <Opener handleClick={() => setMenuOpen(true)} />
       )}

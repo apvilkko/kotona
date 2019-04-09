@@ -179,6 +179,9 @@ const getType = model => {
   if (model.includes("panel") || model.includes("bulb")) {
     return "light";
   }
+  if (model.includes("outlet")) {
+    return "outlet";
+  }
   if (model.includes("sensor")) {
     return "sensor";
   }
