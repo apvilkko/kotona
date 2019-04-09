@@ -269,7 +269,9 @@ export default () => {
     () => {
       if (data !== null) {
         setFiltered(
-          lightsOnly ? data.filter(x => x.subtype === "light") : data
+          lightsOnly
+            ? data.filter(x => x.subtype === "light" || x.subtype === "outlet")
+            : data
         );
       }
     },

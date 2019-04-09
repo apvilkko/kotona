@@ -102,6 +102,13 @@ const stopListening = (integration, dbId, restartImmediately) =>
     });
   });
 
+const sortBy = p => arr => {
+  const sorted = [...arr];
+  return sorted.sort(function(a, b) {
+    return a[p] > b[p] ? 1 : a[p] < b[p] ? -1 : 0;
+  });
+};
+
 const startServer = () => {
   const app = express();
   const expressWs = require("express-ws")(app);
@@ -109,7 +116,8 @@ const startServer = () => {
 
   router.get("/devices", (req, res) => {
     const dbDevices = db.getCollection(DEVICES);
-    res.json(dbDevices);
+    console.log("devices length", dbDevices.length);
+    res.json(sortBy("name")(dbDevices));
   });
 
   router.post("/devices/:id", async (req, res) => {
