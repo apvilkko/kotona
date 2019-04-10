@@ -63,4 +63,5 @@ typings/
 .cache
 commander/data
 commander/secrets.json
+client/dist
 run.json

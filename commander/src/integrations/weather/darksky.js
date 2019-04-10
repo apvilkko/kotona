@@ -3,20 +3,19 @@ const fetch = require("node-fetch");
 let url;
 let config;
 
+const transformEntity = data => ({ ...data, entityId: 1 });
+
 const getEntities = () => {
-  console.log("getEntities", url);
   return new Promise((resolve, reject) =>
-    /* fetch(url)
+    fetch(url)
       .then(res => res.json())
-      .then(res => resolve([res]))
-      .catch(reject) */
-    {
-      resolve([require("./forecast.json")]);
-    }
+      .then(res => resolve([transformEntity(res)]))
+      .catch(reject)
   );
 };
 
 const pollingUpdate = (entity, onData) => {
+  console.log("pollingUpdate", entity.entityId);
   getEntities().then(entities => {
     const data = entities[0];
     if (data) {
@@ -32,7 +31,9 @@ const api = { getEntities, isObservable, pollingUpdate };
 const initialize = (conf, done) => {
   config = conf;
   const query = "?units=si&exclude=flags,alerts";
-  url = `http://headers.jsontest.com/${query}`;
+  url = `https://api.darksky.net/forecast/${config.apiKey}/${config.latitude},${
+    config.longitude
+  }${query}`;
   done(api);
 };
 

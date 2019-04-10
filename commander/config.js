@@ -8,13 +8,13 @@ module.exports = () => ({
   integrations: [
     {
       plugin: "lights/tradfri",
-      enabled: false
+      enabled: true
     },
     {
       plugin: "weather/darksky",
       readOnly: true,
       polling: {
-        default: 5 * 60 * 1000,
+        default: 10 * 60 * 1000,
         quiet: 60 * 60 * 1000
       }
     }
