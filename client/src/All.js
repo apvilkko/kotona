@@ -22,8 +22,8 @@ const deviceState = device => ({
   color: device.color
 });
 
-const DeviceControl = ({ device, setPendingReload, className }) => {
-  const { doRequest, isLoading, data } = useFetch();
+const DeviceControl = ({ device, className }) => {
+  const { doRequest } = useFetch();
   const [request, setRequest] = useState({});
   const initState = deviceState(device);
   const [currentState, setCurrentState] = useState(initState);
@@ -49,90 +49,67 @@ const DeviceControl = ({ device, setPendingReload, className }) => {
     }, 500)
   );
 
-  useEffect(
-    () => {
-      // throttle dimmer control
-      throttled.current(uiState.brightness);
+  useEffect(() => {
+    // throttle dimmer control
+    throttled.current(uiState.brightness);
 
-      if (uiState.color !== desiredState.color) {
-        setDesiredState({
-          ...desiredState,
-          color: uiState.color
-        });
-      }
-      if (uiState.on !== desiredState.on) {
-        setDesiredState({
-          ...desiredState,
-          on: uiState.on
-        });
-      }
-    },
-    [uiState]
-  );
+    if (uiState.color !== desiredState.color) {
+      setDesiredState({
+        ...desiredState,
+        color: uiState.color
+      });
+    }
+    if (uiState.on !== desiredState.on) {
+      setDesiredState({
+        ...desiredState,
+        on: uiState.on
+      });
+    }
+  }, [uiState]);
 
   // update device data from backend
-  useEffect(
-    () => {
-      const newState = deviceState(device);
-      // console.log("set current from backend");
-      setCurrentState(newState);
-      setDesiredState(newState);
-      setUiState(newState);
-      setTimeout(() => {
-        setUiRequestPending(false);
-      }, 400);
-    },
-    [device]
-  );
+  useEffect(() => {
+    const newState = deviceState(device);
+    // console.log("set current from backend");
+    setCurrentState(newState);
+    setDesiredState(newState);
+    setUiState(newState);
+    const timeout = setTimeout(() => {
+      setUiRequestPending(false);
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [device]);
 
   // send change request to backend
-  useEffect(
-    () => {
-      if (request && request.id) {
-        // console.log("request", request);
-        doRequest({
-          method: "post",
-          url: `/api/devices/${request.id}`,
-          body: request
-        });
-        setUiRequestPending(true);
-      }
-    },
-    [request]
-  );
+  useEffect(() => {
+    if (request && request.id) {
+      // console.log("request", request);
+      doRequest({
+        method: "post",
+        url: `/api/devices/${request.id}`,
+        body: request
+      });
+      setUiRequestPending(true);
+    }
+  }, [request]);
 
-  useEffect(
-    () => {
-      if (!uiRequestPending && !isEqual(desiredState, currentState)) {
-        // console.log("desiredState change", desiredState);
-        let handled = false;
-        if (Math.abs(desiredState.brightness - currentState.brightness) > 1) {
-          setRequest({ id: device.id, dimmer: desiredState.brightness });
-          handled = true;
-        }
-        if (!handled && desiredState.color !== currentState.color) {
-          setRequest({ id: device.id, color: desiredState.color });
-          handled = true;
-        }
-        if (!handled && desiredState.on !== currentState.on) {
-          setRequest({ id: device.id, state: desiredState.on });
-        }
+  useEffect(() => {
+    if (!uiRequestPending && !isEqual(desiredState, currentState)) {
+      // console.log("desiredState change", desiredState);
+      let handled = false;
+      if (Math.abs(desiredState.brightness - currentState.brightness) > 1) {
+        setRequest({ id: device.id, dimmer: desiredState.brightness });
+        handled = true;
       }
-    },
-    [desiredState]
-  );
-
-  // reload data when change requests complete
-  useEffect(
-    () => {
-      if (request.id && !isLoading) {
-        setTimeout(() => {
-          setPendingReload(new Date().getTime());
-        }, 1000);
+      if (!handled && desiredState.color !== currentState.color) {
+        setRequest({ id: device.id, color: desiredState.color });
+        handled = true;
       }
-    },
-    [data, isLoading]
-  );
+      if (!handled && desiredState.on !== currentState.on) {
+        setRequest({ id: device.id, state: desiredState.on });
+      }
+    }
+  }, [desiredState]);
 
   return (
     <div className={className}>
@@ -185,39 +162,23 @@ const StyledFilters = styled(Filters)`
   margin-bottom: 0.5em;
 `;
 
-const useInterval = (callback, delay) => {
-  const savedCallback = useRef();
-
-  useEffect(() => {
-    savedCallback.current = callback;
-  });
-
-  useEffect(
-    () => {
-      function tick() {
-        savedCallback.current();
-      }
-
-      let id = setInterval(tick, delay);
-      return () => clearInterval(id);
-    },
-    [delay]
-  );
-};
-
-const POLL_TIME = 15 * 1000;
-
 let socket = null;
 
 export default () => {
   const [lightsOnly, setLightsOnly] = useState(true);
   const { doFetch, data, setData } = useFetch();
   const [filtered, setFiltered] = useState([]);
-  const [pendingReload, setPendingReload] = useState(false);
   const [message, setMessage] = useState({});
 
   const fetchAll = useCallback(() => {
     doFetch("/api/devices");
+  });
+
+  const onSocketClose = useCallback(() => {
+    console.log("ws close, reloading");
+    return setTimeout(() => {
+      window.location.reload(false);
+    }, 1000);
   });
 
   const openWs = useCallback(() => {
@@ -234,12 +195,7 @@ export default () => {
         }
       }
     });
-    socket.addEventListener("close", () => {
-      console.log("ws close, reloading");
-      setTimeout(() => {
-        window.location.reload(false);
-      }, 1000);
-    });
+    socket.addEventListener("close", onSocketClose);
     socket.addEventListener("error", e => {
       console.log("ws error", e);
       socket.close();
@@ -249,45 +205,40 @@ export default () => {
   useEffect(() => {
     fetchAll();
     openWs();
+    return () => {
+      console.log("closing socket");
+      socket.removeEventListener("close", onSocketClose);
+      socket.close();
+    };
   }, []);
 
-  useEffect(
-    () => {
-      setData(data => {
-        if (data) {
-          const id = message.id;
-          const index = data.findIndex(item => item.id === id);
-          return [...data.slice(0, index), message, ...data.slice(index + 1)];
-        }
-        return data;
-      });
-    },
-    [message]
-  );
-
-  useEffect(
-    () => {
-      if (data !== null) {
-        setFiltered(
-          lightsOnly
-            ? data.filter(x => x.subtype === "light" || x.subtype === "outlet")
-            : data
-        );
+  useEffect(() => {
+    setData(data => {
+      if (data) {
+        const id = message.id;
+        const index = data.findIndex(item => item.id === id);
+        return [...data.slice(0, index), message, ...data.slice(index + 1)];
       }
-    },
-    [data, lightsOnly]
-  );
+      return data;
+    });
+  }, [message]);
+
+  useEffect(() => {
+    if (data !== null) {
+      setFiltered(
+        lightsOnly
+          ? data.filter(x => x.subtype === "light" || x.subtype === "outlet")
+          : data
+      );
+    }
+  }, [data, lightsOnly]);
 
   if (!data) return null;
   return (
     <div>
-      <StyledFilters lightsOnly={lightsOnly} setLightsOnly={setLightsOnly} />
+      {/* <StyledFilters lightsOnly={lightsOnly} setLightsOnly={setLightsOnly} /> */}
       {filtered.map(device => (
-        <StyledDeviceControl
-          key={device.id}
-          device={device}
-          setPendingReload={setPendingReload}
-        />
+        <StyledDeviceControl key={device.id} device={device} />
       ))}
     </div>
   );

@@ -1,4 +1,3 @@
-import React from "react";
 import Main from "./Main";
 import Commands from "./Commands";
 import All from "./All.js";

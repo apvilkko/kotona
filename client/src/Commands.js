@@ -7,12 +7,9 @@ import useFetch from "./useFetch";
 const CommandsContainer = ({ render, reload }) => {
   const { data, isLoading, error, doFetch } = useFetch();
 
-  useEffect(
-    () => {
-      doFetch("/api/commands");
-    },
-    [reload]
-  );
+  useEffect(() => {
+    doFetch("/api/commands");
+  }, [reload]);
 
   if (error) return "" + error;
   if (isLoading) return <Loading />;
@@ -54,15 +51,12 @@ const fields = [
   { label: "Value", id: "value" }
 ];
 
-const CommandEditor = ({ current, currentData, onExit }) => {
+const CommandEditor = ({ currentData, onExit }) => {
   const [formData, setFormData] = useState(null);
 
-  useEffect(
-    () => {
-      setFormData(currentData);
-    },
-    [currentData]
-  );
+  useEffect(() => {
+    setFormData(currentData);
+  }, [currentData]);
 
   const handleChange = id => evt => {
     setFormData({
@@ -103,15 +97,12 @@ export default () => {
   const { doRequest, isLoading } = useFetch();
   const [pendingReload, setPendingReload] = useState(false);
 
-  useEffect(
-    () => {
-      if (!isLoading && pendingReload) {
-        setPendingReload(false);
-        setReload(new Date().getTime());
-      }
-    },
-    [reload, isLoading]
-  );
+  useEffect(() => {
+    if (!isLoading && pendingReload) {
+      setPendingReload(false);
+      setReload(new Date().getTime());
+    }
+  }, [reload, isLoading]);
 
   const requestReload = () => setPendingReload(true);
 

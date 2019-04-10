@@ -4,6 +4,7 @@ const router = require("express-promise-router")();
 const kill = require("tree-kill");
 const dbFactory = require("./db");
 const integrationsFactory = require("./integrations/index");
+const isQuietHours = require("./isQuietHours");
 
 const PORTS = require("../../ports");
 const port = PORTS.commander;
@@ -19,8 +20,10 @@ const startListeningDevice = (integration, key, dbInstance, device) => {
   const onData = data => {
     // console.log("update", device.id, device.deviceId, data);
     const updated = dbInstance.updateDeviceData(device.id, data);
-    if (socket.ws && updated) {
-      console.log("update", device.id, device.deviceId);
+    if (socket.ws && socket.ws.readyState !== 1) {
+      console.log("update: ws not ready");
+    } else if (socket.ws && updated) {
+      console.log("update", device.deviceId);
       socket.ws.send(JSON.stringify(updated));
     }
   };
@@ -54,10 +57,8 @@ const startListeningDevice = (integration, key, dbInstance, device) => {
 };
 
 const getRefreshDelay = date => {
-  const hour = (date || new Date()).getHours();
-  // TODO "quiet hours" in config
   const randomPart = Math.round(Math.random() * 30000);
-  return hour >= 23 && hour < 6
+  return isQuietHours()
     ? 15 * 60 * 1000 + randomPart
     : 5 * 60 * 1000 + randomPart;
 };

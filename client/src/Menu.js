@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, Switch, Route } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import Closer from "./components/Closer";
 import Button, { BaseButton } from "./components/Button";

@@ -1,9 +1,12 @@
-import React, { Component, useEffect } from "react";
+import React, { useEffect } from "react";
 
 export default ({ children, onClick }) => {
   const refs = React.Children.map(children, () => React.createRef());
   const handleClick = e => {
     const isOutside = refs.every(ref => {
+      if (!ref.current) {
+        return false;
+      }
       return !ref.current.contains(e.target);
     });
     if (isOutside) {
