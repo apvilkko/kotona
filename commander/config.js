@@ -1,13 +1,21 @@
 const secrets = require("./secrets.json");
 
 module.exports = () => ({
-  dbAdapter: "loki",
-  dbPath: "./data",
+  db: {
+    adapter: "loki",
+    path: "./data"
+  },
   integrations: [
     {
       plugin: "lights/tradfri",
-      config: {
-        ...secrets["lights/tradfri"]
+      enabled: false
+    },
+    {
+      plugin: "weather/darksky",
+      readOnly: true,
+      polling: {
+        default: 5 * 60 * 1000,
+        quiet: 60 * 60 * 1000
       }
     }
   ]

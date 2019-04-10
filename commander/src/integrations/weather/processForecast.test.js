@@ -1,5 +1,5 @@
 const forecast = require("./forecast.json");
-const { processForecast } = require("./darksky");
+const processForecast = require("./processForecast");
 
 describe("darksky", () => {
   test("forecast is parsed", () => {

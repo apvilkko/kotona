@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import Closer from "./components/Closer";
-import ClickOutside from "./components/ClickOutside";
+import Closer from "../../components/Closer";
+import ClickOutside from "../../components/ClickOutside";
 
 const Color = styled("button")`
   height: 3rem;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Loading from "./components/Loading";
 import Button from "./components/Button";
 import LabeledInput from "./components/LabeledInput";
-import useFetch from "./useFetch";
+import useFetch from "./hooks/useFetch";
 
 const CommandsContainer = ({ render, reload }) => {
   const { data, isLoading, error, doFetch } = useFetch();
@@ -46,7 +46,7 @@ const CommandsList = ({ data, setEditing, remove, runCommand }) =>
 
 const fields = [
   { label: "Name", id: "name" },
-  { label: "Device", id: "device" },
+  { label: "Entity", id: "entity" },
   { label: "Parameter", id: "parameter" },
   { label: "Value", id: "value" }
 ];

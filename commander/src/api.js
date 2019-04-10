@@ -9,29 +9,34 @@ const isQuietHours = require("./isQuietHours");
 const PORTS = require("../../ports");
 const port = PORTS.commander;
 
+const METHOD_NOT_ALLOWED = 405;
+
 const COMMANDS = "commands";
-const DEVICES = "entities";
+const ENTITIES = "entities";
 let integrations = {};
 let db = null;
 const observed = {};
 const socket = {};
 
-const startListeningDevice = (integration, key, dbInstance, device) => {
-  const onData = data => {
-    // console.log("update", device.id, device.deviceId, data);
-    const updated = dbInstance.updateDeviceData(device.id, data);
-    if (socket.ws && socket.ws.readyState !== 1) {
-      console.log("update: ws not ready");
-    } else if (socket.ws && updated) {
-      console.log("update", device.deviceId);
-      socket.ws.send(JSON.stringify(updated));
-    }
-  };
+const onDataCreator = (dbInstance, entity) => data => {
+  // console.log("update", entity.id, entity.entityId, data);
+  const updated = dbInstance.updateEntityData(entity.id, data);
+  if (socket.ws && socket.ws.readyState !== 1) {
+    console.log("update: ws not ready");
+  } else if (socket.ws && updated) {
+    console.log("update", entity.entityId);
+    socket.ws.send(JSON.stringify(updated));
+  }
+};
+
+// TODO refactor to integration
+const startListeningEntity = (integration, intKey, dbInstance, entity) => {
+  const onData = onDataCreator(dbInstance, entity);
   const onClose = code => {
     let delay = 1000 + Math.round(Math.random() * 5000);
     if (
-      observed[key][device.id] &&
-      observed[key][device.id].restartImmediately
+      observed[intKey][entity.id] &&
+      observed[intKey][entity.id].restartImmediately
     ) {
       delay = 100;
     }
@@ -39,16 +44,16 @@ const startListeningDevice = (integration, key, dbInstance, device) => {
       // process exited so probably some kind of problem
       delay = 10 * 60 * 1000;
     }
-    console.log("close", code, key, delay);
+    console.log("close", code, intKey, delay);
     setTimeout(() => {
       // restart listening
       startListener();
     }, delay);
   };
   function startListener() {
-    console.log("Start listening", device.id, device.deviceId);
-    observed[key][device.id] = integration.startObserving(
-      device.deviceId,
+    console.log("Start listening", entity.id, entity.entityId);
+    observed[intKey][entity.id] = integration.startObserving(
+      entity.entityId,
       onData,
       onClose
     );
@@ -56,48 +61,59 @@ const startListeningDevice = (integration, key, dbInstance, device) => {
   startListener();
 };
 
-const getRefreshDelay = date => {
-  const randomPart = Math.round(Math.random() * 30000);
-  return isQuietHours()
-    ? 15 * 60 * 1000 + randomPart
-    : 5 * 60 * 1000 + randomPart;
+const getRefreshDelay = (defaultDelay, quietDelay) => {
+  const delay = isQuietHours()
+    ? quietDelay || 15 * 60 * 1000
+    : defaultDelay || 5 * 60 * 1000;
+  const randomPart = Math.round(Math.random() * Math.min(30000, delay / 2));
+  return delay + randomPart;
 };
 
-// TODO move logic to integration
-const shouldListen = device => {
-  return device.subtype === "light" || device.subtype === "outlet";
-};
+const INITIAL_LISTENING_DELAY = 500;
 
-const startListening = (integration, key, dbInstance, devices) => {
-  devices.forEach((device, i) => {
-    if (shouldListen(device)) {
+const startListening = (integration, intKey, dbInstance, entities) => {
+  entities.forEach((entity, i) => {
+    if (integration.isObservable(entity)) {
       setTimeout(() => {
-        startListeningDevice(integration, key, dbInstance, device);
+        startListeningEntity(integration, intKey, dbInstance, entity);
         setTimeout(() => {
-          stopListening(key, device.id);
+          stopListening(intKey, entity.id);
         }, 10000 + Math.random() * 30000);
         const refreshByInterval = delay => {
           setTimeout(() => {
             console.log("interval refresh listener");
-            stopListening(key, device.id);
+            stopListening(intKey, entity.id);
             refreshByInterval(getRefreshDelay());
           }, delay);
         };
         refreshByInterval(getRefreshDelay());
-      }, i * 500);
+      }, i * INITIAL_LISTENING_DELAY);
+    } else if (integration.config.polling) {
+      const onData = onDataCreator(dbInstance, entity);
+      const doPollingUpdate = () => {
+        integration.pollingUpdate(entity, onData);
+        const nextDelay = getRefreshDelay(
+          integration.config.polling.default,
+          integration.config.polling.quiet
+        );
+        setTimeout(() => {
+          doPollingUpdate();
+        }, nextDelay);
+      };
+      setTimeout(doPollingUpdate, INITIAL_LISTENING_DELAY);
     }
   });
 };
 
-const stopListening = (integration, dbId, restartImmediately) =>
+const stopListening = (intKey, dbId, restartImmediately) =>
   new Promise((resolve, reject) => {
-    const child = observed[integration][dbId];
+    const child = observed[intKey][dbId];
     if (!child || !child.pid) {
       resolve();
       return;
     }
     kill(child.pid, "SIGINT", err => {
-      observed[integration][dbId] = { restartImmediately };
+      observed[intKey][dbId] = { restartImmediately };
       console.log("killed", child.pid);
       resolve();
     });
@@ -115,32 +131,42 @@ const startServer = () => {
   const expressWs = require("express-ws")(app);
   app.use(bodyParser.json());
 
-  router.get("/devices", (req, res) => {
-    const dbDevices = db.getCollection(DEVICES);
-    console.log("devices length", dbDevices.length);
-    res.json(sortBy("name")(dbDevices));
+  router.get("/entities", (req, res) => {
+    const integration = req.query.type;
+    let dbEntities;
+    if (integration) {
+      dbEntities = db.getCollection(ENTITIES, { integration });
+    } else {
+      dbEntities = db.getCollection(ENTITIES);
+    }
+    res.json(sortBy("name")(dbEntities));
   });
 
-  router.post("/devices/:id", async (req, res) => {
-    const dbDevice = db.getEntity(DEVICES, req.params.id);
-    if (!dbDevice) {
+  router.post("/entities/:id", async (req, res) => {
+    const dbEntity = db.getEntity(ENTITIES, req.params.id);
+    if (!dbEntity) {
       res.sendStatus(400);
       return;
     }
-    const integration = "lights/tradfri";
-    await stopListening(integration, dbDevice.id, true);
+    const intKey = req.body.integration;
+    delete req.body.integration;
+    const integration = integrations[intKey];
+    if (!integration || integration.config.readOnly === false) {
+      res.sendStatus(METHOD_NOT_ALLOWED);
+    }
+    await stopListening(intKey, dbEntity.id, true);
     if (req.body.id) {
       delete req.body.id;
     }
     const key = Object.keys(req.body)[0];
     const value = Object.values(req.body)[0];
     try {
-      const result = await integrations[integration].setDeviceState(
-        dbDevice.deviceId,
+      const result = await integrations[intKey].setEntityState(
+        dbEntity.entityId,
         key,
         value
       );
-      // console.log("setDeviceState result", result);
+      // console.log("setEntityState result", result);
       res.sendStatus(200);
     } catch (e) {
       console.error(e);
@@ -165,14 +191,10 @@ const startServer = () => {
   router.post("/commands/:id/run", async (req, res) => {
     const command = db.getEntity(COMMANDS, req.params.id);
     console.log("run", command);
-    const integration = "lights/tradfri";
-    const { device: deviceId, parameter, value } = command;
+    const intKey = "lights/tradfri";
+    const { entity: entityId, parameter, value } = command;
     try {
-      await integrations[integration].setDeviceState(
-        deviceId,
-        parameter,
-        value
-      );
+      await integrations[intKey].setEntityState(entityId, parameter, value);
       res.sendStatus(200);
     } catch (e) {
       console.error(e);
@@ -197,14 +219,14 @@ const startServer = () => {
   app.listen(port);
 };
 
-const doSync = (integration, key, dbInstance, cb) => {
-  // console.log("Starting sync for", key);
-  let savedDevices = [];
+const doSync = (integration, intKey, dbInstance, cb) => {
+  // console.log("Starting sync for", intKey);
+  let savedEntities = [];
   integration
-    .getDevices()
-    .then(devices => {
-      savedDevices = dbInstance.syncDevices(key, devices);
-      cb(savedDevices);
+    .getEntities()
+    .then(entities => {
+      savedEntities = dbInstance.syncEntities(intKey, entities);
+      cb(savedEntities);
     })
     .catch(e => {
       console.error("doSync error:", e);
@@ -217,12 +239,12 @@ dbFactory.initialize(dbInstance => {
   integrationsFactory.initialize(data => {
     integrations = data;
     console.log("Initialized integrations", Object.keys(integrations));
-    Object.keys(integrations).forEach(key => {
-      observed[key] = {};
-      const integration = integrations[key];
-      doSync(integration, key, dbInstance, devices => {
+    Object.keys(integrations).forEach(intKey => {
+      observed[intKey] = {};
+      const integration = integrations[intKey];
+      doSync(integration, intKey, dbInstance, entities => {
         setTimeout(() => {
-          startListening(integration, key, dbInstance, devices);
+          startListening(integration, intKey, dbInstance, entities);
         }, 2000);
       });
     });

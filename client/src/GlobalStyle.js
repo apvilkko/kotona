@@ -22,6 +22,23 @@ export default createGlobalStyle`
     color: ${p => p.theme.colorPrimary};
   }
 
+  small {
+    font-size: 1rem;
+  }
+
+  .icon {
+    stroke: ${p => p.theme.colorPrimary};
+    fill: ${p => p.theme.colorPrimary};
+  }
+
+  .icon-sm {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    vertical-align: -40%;
+    margin: -0.3rem
+  }
+
   a {
     color: ${p => p.theme.colorPrimary};
   }

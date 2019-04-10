@@ -1,12 +1,16 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import styled from "styled-components";
-import Button from "./components/Button";
-import LabeledInput from "./components/LabeledInput";
-import useFetch from "./useFetch";
-import throttle from "./throttle";
-import isEqual from "./isEqual";
-import { getColorChoices } from "./integrations/lights/tradfri";
+import Button from "../../components/Button";
+import LabeledInput from "../../components/LabeledInput";
+import Loading from "../../components/Loading";
+import useFetch from "../../hooks/useFetch";
+import useWebSocket from "../../hooks/useWebSocket";
+import throttle from "../../utils/throttle";
+import isEqual from "../../utils/isEqual";
+import { getColorChoices } from "./tradfri";
 import ColorChanger from "./ColorChanger";
+
+const integration = "lights/tradfri";
 
 const StyledRange = styled("input")`
   -webkit-appearance: none !important;
@@ -16,21 +20,21 @@ const StyledRange = styled("input")`
   width: 15em;
 `;
 
-const deviceState = device => ({
-  on: device.on,
-  brightness: Math.round(device.brightness),
-  color: device.color
+const entityState = entity => ({
+  on: entity.on,
+  brightness: Math.round(entity.brightness),
+  color: entity.color
 });
 
-const DeviceControl = ({ device, className }) => {
+const EntityControl = ({ entity, className }) => {
   const { doRequest } = useFetch();
   const [request, setRequest] = useState({});
-  const initState = deviceState(device);
+  const initState = entityState(entity);
   const [currentState, setCurrentState] = useState(initState);
   const [desiredState, setDesiredState] = useState(initState);
   const [uiState, setUiState] = useState(initState);
   const [uiRequestPending, setUiRequestPending] = useState(false);
-  const [colors, setColors] = useState(getColorChoices(device));
+  const [colors, setColors] = useState(getColorChoices(entity));
 
   const throttled = useRef(
     throttle(newValue => {
@@ -67,9 +71,9 @@ const DeviceControl = ({ device, className }) => {
     }
   }, [uiState]);
 
-  // update device data from backend
+  // update entity data from backend
   useEffect(() => {
-    const newState = deviceState(device);
+    const newState = entityState(entity);
     // console.log("set current from backend");
     setCurrentState(newState);
     setDesiredState(newState);
@@ -78,7 +82,7 @@ const DeviceControl = ({ device, className }) => {
       setUiRequestPending(false);
     }, 400);
     return () => clearTimeout(timeout);
-  }, [device]);
+  }, [entity]);
 
   // send change request to backend
   useEffect(() => {
@@ -86,8 +90,8 @@ const DeviceControl = ({ device, className }) => {
       // console.log("request", request);
       doRequest({
         method: "post",
-        url: `/api/devices/${request.id}`,
-        body: request
+        url: `/api/entities/${request.id}`,
+        body: { ...request, integration }
       });
       setUiRequestPending(true);
     }
@@ -98,15 +102,15 @@ const DeviceControl = ({ device, className }) => {
       // console.log("desiredState change", desiredState);
       let handled = false;
       if (Math.abs(desiredState.brightness - currentState.brightness) > 1) {
-        setRequest({ id: device.id, dimmer: desiredState.brightness });
+        setRequest({ id: entity.id, dimmer: desiredState.brightness });
         handled = true;
       }
       if (!handled && desiredState.color !== currentState.color) {
-        setRequest({ id: device.id, color: desiredState.color });
+        setRequest({ id: entity.id, color: desiredState.color });
         handled = true;
       }
       if (!handled && desiredState.on !== currentState.on) {
-        setRequest({ id: device.id, state: desiredState.on });
+        setRequest({ id: entity.id, state: desiredState.on });
       }
     }
   }, [desiredState]);
@@ -117,7 +121,7 @@ const DeviceControl = ({ device, className }) => {
         color={uiState.on ? "green" : ""}
         onClick={() => setUiState({ ...uiState, on: !uiState.on })}
       >
-        {device.name}
+        {entity.name}
       </Button>
       <StyledRange
         type="range"
@@ -135,7 +139,7 @@ const DeviceControl = ({ device, className }) => {
   );
 };
 
-const StyledDeviceControl = styled(DeviceControl)`
+const StyledEntityControl = styled(EntityControl)`
   margin-bottom: 0.2em;
   display: flex;
   align-items: center;
@@ -162,66 +166,33 @@ const StyledFilters = styled(Filters)`
   margin-bottom: 0.5em;
 `;
 
-let socket = null;
-
 export default () => {
   const [lightsOnly, setLightsOnly] = useState(true);
-  const { doFetch, data, setData } = useFetch();
+  const { doFetch, data, setData, isLoading } = useFetch();
   const [filtered, setFiltered] = useState([]);
   const [message, setMessage] = useState({});
+  const { jsonData } = useWebSocket();
 
   const fetchAll = useCallback(() => {
-    doFetch("/api/devices");
-  });
-
-  const onSocketClose = useCallback(() => {
-    console.log("ws close, reloading");
-    return setTimeout(() => {
-      window.location.reload(false);
-    }, 1000);
-  });
-
-  const openWs = useCallback(() => {
-    socket = new WebSocket(`ws://${window.location.host}/ws/update`);
-    socket.addEventListener("open", evt => {
-      console.log("socket opened", evt);
-    });
-    socket.addEventListener("message", evt => {
-      if (evt && evt.data) {
-        const jsonData = JSON.parse(evt.data);
-        if (jsonData.id) {
-          // console.log("set data from update");
-          setMessage(jsonData);
-        }
-      }
-    });
-    socket.addEventListener("close", onSocketClose);
-    socket.addEventListener("error", e => {
-      console.log("ws error", e);
-      socket.close();
-    });
+    doFetch(`/api/entities?type=${encodeURIComponent(integration)}`);
   });
 
   useEffect(() => {
     fetchAll();
-    openWs();
-    return () => {
-      console.log("closing socket");
-      socket.removeEventListener("close", onSocketClose);
-      socket.close();
-    };
   }, []);
 
   useEffect(() => {
     setData(data => {
       if (data) {
-        const id = message.id;
+        const id = jsonData.id;
         const index = data.findIndex(item => item.id === id);
-        return [...data.slice(0, index), message, ...data.slice(index + 1)];
+        if (index > -1) {
+          return [...data.slice(0, index), jsonData, ...data.slice(index + 1)];
+        }
       }
       return data;
     });
-  }, [message]);
+  }, [jsonData]);
 
   useEffect(() => {
     if (data !== null) {
@@ -233,12 +204,12 @@ export default () => {
     }
   }, [data, lightsOnly]);
 
-  if (!data) return null;
+  if (!data || isLoading) return <Loading />;
   return (
     <div>
       {/* <StyledFilters lightsOnly={lightsOnly} setLightsOnly={setLightsOnly} /> */}
-      {filtered.map(device => (
-        <StyledDeviceControl key={device.id} device={device} />
+      {filtered.map(entity => (
+        <StyledEntityControl key={entity.id} entity={entity} />
       ))}
     </div>
   );

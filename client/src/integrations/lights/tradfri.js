@@ -22,10 +22,10 @@ const RGB_COLORS = [
   "f5faf6"
 ];
 
-const getColorChoices = device => {
-  if (device.model.includes("bulb") && device.model.includes("CWS")) {
+const getColorChoices = entity => {
+  if (entity.model.includes("bulb") && entity.model.includes("CWS")) {
     return RGB_COLORS;
-  } else if (device.model.includes("bulb") && device.model.includes("WS")) {
+  } else if (entity.model.includes("bulb") && entity.model.includes("WS")) {
     return COLD_WARM_COLORS;
   }
   return null;

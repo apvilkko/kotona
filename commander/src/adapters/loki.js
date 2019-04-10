@@ -31,18 +31,14 @@ const deleteEntity = (collection, id) => {
   }
 };
 
-const updateDeviceData = (id, device) => {
+const updateEntityData = (id, entity) => {
   const collection = "entities";
-  // console.log("update", device);
+  // console.log("update", entity);
   const existing = db.getCollection(collection).findOne({ id });
   if (existing) {
     const newData = {
       ...existing,
-      name: device.name,
-      data: device.data,
-      on: device.on,
-      brightness: device.brightness,
-      color: device.color
+      ...entity
     };
     saveEntity(collection, newData);
     return newData;
@@ -50,28 +46,28 @@ const updateDeviceData = (id, device) => {
   return null;
 };
 
-const syncDevices = (integration, devices) => {
+const syncEntities = (intKey, entities) => {
   const collection = "entities";
-  devices.forEach(device => {
+  entities.forEach(entity => {
     const existing = db
       .getCollection(collection)
-      .findOne({ deviceId: device.deviceId });
+      .findOne({ entityId: entity.entityId });
     if (existing) {
       saveEntity(collection, {
         ...existing,
-        name: device.name,
-        data: device.data
+        name: entity.name,
+        data: entity.data
       });
     } else {
       saveEntity(collection, {
-        ...device,
-        type: "device",
-        integration
+        ...entity,
+        type: "entity",
+        integration: intKey
       });
     }
   });
-  console.log(`Synced ${devices.length} devices.`);
-  return db.getCollection(collection, { integration }).find();
+  console.log(`Synced ${entities.length} entities.`);
+  return db.getCollection(collection, { integration: intKey }).find();
 };
 
 const api = {
@@ -79,8 +75,8 @@ const api = {
   saveEntity,
   deleteEntity,
   getEntity,
-  syncDevices,
-  updateDeviceData
+  syncEntities,
+  updateEntityData
 };
 
 const initLoki = (collections, done) => () => {
@@ -101,7 +97,7 @@ const initialize = (config, done) => {
     });
   };
 
-  db = new loki(path.resolve(config.dbPath, "kotona.db"), {
+  db = new loki(path.resolve(config.db.path, "kotona.db"), {
     autoload: true,
     autoloadCallback: initLoki(config.collections, initCallback),
     autosave: true,

@@ -1,88 +1,39 @@
-// ?units=si&exclude=flags,alerts
+const fetch = require("node-fetch");
 
-const pickCurrently = [
-  "time",
-  "icon",
-  "precipIntensity",
-  "precipProbability",
-  "precipType",
-  "temperature",
-  "apparentTemperature",
-  "humidity",
-  "windSpeed",
-  "windGust",
-  "cloudCover"
-];
+let url;
+let config;
 
-const pickForecast = [
-  "time",
-  "icon",
-  "precipIntensity",
-  "precipIntensityMax",
-  "precipIntensityMaxTime",
-  "precipProbability",
-  "precipType",
-  "temperatureHigh",
-  "temperatureHighTime",
-  "temperatureLow",
-  "temperatureLowTime",
-  "apparentTemperatureHigh",
-  "apparentTemperatureHighTime",
-  "apparentTemperatureLow",
-  "apparentTemperatureLowTime",
-  "humidity",
-  "windSpeed",
-  "windGust",
-  "windGustTime",
-  "windBearing",
-  "cloudCover",
-  "temperatureMin",
-  "temperatureMinTime",
-  "temperatureMax",
-  "temperatureMaxTime",
-  "apparentTemperatureMin",
-  "apparentTemperatureMinTime",
-  "apparentTemperatureMax",
-  "apparentTemperatureMaxTime"
-];
-
-const pick = keys => obj => {
-  const ret = {};
-  Object.keys(obj)
-    .filter(key => keys.includes(key))
-    .forEach(key => {
-      ret[key] = obj[key];
-    });
-  return ret;
+const getEntities = () => {
+  console.log("getEntities", url);
+  return new Promise((resolve, reject) =>
+    /* fetch(url)
+      .then(res => res.json())
+      .then(res => resolve([res]))
+      .catch(reject) */
+    {
+      resolve([require("./forecast.json")]);
+    }
+  );
 };
 
-const getTime = time => new Date(time * 1000);
-
-const processForecast = data => {
-  const timezone = data.timezone;
-  const currentlyTime = getTime(data.currently.time);
-  const hourlyTimes = [3, 6, 9];
-  const hourlyPicks = [];
-  let i = 0;
-  data.hourly.data.forEach(hour => {
-    const hourTime = getTime(hour.time);
-    const diffMinutes = (hourTime - currentlyTime) / 1000 / 60;
-    if (
-      i < hourlyTimes.length &&
-      diffMinutes <= hourlyTimes[i] * 60 &&
-      diffMinutes > (hourlyTimes[i] - 1) * 60
-    ) {
-      hourlyPicks.push(hour);
-      i++;
+const pollingUpdate = (entity, onData) => {
+  getEntities().then(entities => {
+    const data = entities[0];
+    if (data) {
+      onData(data);
     }
   });
-  const ret = {
-    currently: data.currently,
-    hourly: hourlyPicks
-  };
-  return ret;
 };
 
-const api = { processForecast };
+const isObservable = () => false;
 
-module.exports = api;
+const api = { getEntities, isObservable, pollingUpdate };
+
+const initialize = (conf, done) => {
+  config = conf;
+  const query = "?units=si&exclude=flags,alerts";
+  url = `http://headers.jsontest.com/${query}`;
+  done(api);
+};
+
+module.exports = initialize;

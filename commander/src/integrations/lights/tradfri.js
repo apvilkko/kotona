@@ -33,13 +33,13 @@ let config = {};
 
 const MAX_TRIES = 3;
 
-const getState = (device, model, prop) => {
+const getState = (entity, model, prop) => {
   const attr = model.includes("control")
     ? ATTR_SWITCH_PLUG
     : ATTR_LIGHT_CONTROL;
-  if (device[attr]) {
+  if (entity[attr]) {
     const p = prop || LIGHT_CONTROL.state;
-    const val = device[attr][0][p];
+    const val = entity[attr][0][p];
     return p === LIGHT_CONTROL.state ? !!val : val;
   }
   return false;
@@ -47,17 +47,17 @@ const getState = (device, model, prop) => {
 
 const clamp = (val, newMax, max) => (val * newMax) / max;
 
-const transformDevice = device => {
-  const model = getProp(device, PROPS.model);
+const transformEntity = entity => {
+  const model = getProp(entity, PROPS.model);
   return {
-    name: getProp(device, PROPS.name),
+    name: getProp(entity, PROPS.name),
     model,
-    deviceId: getProp(device, PROPS.id),
+    entityId: getProp(entity, PROPS.id),
     subtype: getType(model),
-    data: device,
-    on: getState(device, model),
-    brightness: clamp(getState(device, model, LIGHT_CONTROL.dimmer), 100, 254),
-    color: getState(device, model, LIGHT_CONTROL.color)
+    data: entity,
+    on: getState(entity, model),
+    brightness: clamp(getState(entity, model, LIGHT_CONTROL.dimmer), 100, 254),
+    color: getState(entity, model, LIGHT_CONTROL.color)
   };
 };
 
@@ -104,10 +104,10 @@ const doRequest = (command, parse = false, delayMs) =>
     }, delayMs || 0);
   });
 
-const getUri = (gatewayIp, deviceId) => {
+const getUri = (gatewayIp, entityId) => {
   const uri = `coaps://${gatewayIp}:5684/${DEVICES}`;
-  if (deviceId) {
-    return `${uri}/${deviceId}`;
+  if (entityId) {
+    return `${uri}/${entityId}`;
   }
   return uri;
 };
@@ -150,18 +150,18 @@ const createParamList = (method, payload, observe) => {
   return ret;
 };
 
-const createParams = (method, payload, deviceId, observe) => {
+const createParams = (method, payload, entityId, observe) => {
   const paramString = createParamList(method, payload, observe).join(" ");
-  return `${paramString} "${getUri(config.gatewayIp, deviceId)}"`;
+  return `${paramString} "${getUri(config.gatewayIp, entityId)}"`;
 };
 
-const setDeviceState = (deviceId, parameter, value) => {
+const setEntityState = (entityId, parameter, value) => {
   let val = value;
   if (parameter === "dimmer") {
     val = Math.round((Number(value) / 100) * 254);
   }
-  const params = createParams("put", createPayload(parameter, val), deviceId);
-  // console.log("setDeviceState", deviceId, parameter, val, params);
+  const params = createParams("put", createPayload(parameter, val), entityId);
+  // console.log("setEntityState", entityId, parameter, val, params);
   return doRequest(`${config.coapClient} ${params}`);
 };
 
@@ -190,18 +190,18 @@ const getType = model => {
   }
 };
 
-const getDevices = () => {
+const getEntities = () => {
   const params = createParams("get");
   return new Promise((resolve, reject) => {
     doRequest(`${config.coapClient} ${params}`, true)
-      .then(deviceList => {
-        const subRequests = deviceList.map((deviceId, i) => {
-          const params = createParams("get", null, deviceId);
+      .then(entityList => {
+        const subRequests = entityList.map((entityId, i) => {
+          const params = createParams("get", null, entityId);
           return doRequest(`${config.coapClient} ${params}`, true, 10 * i);
         });
         Promise.all(subRequests)
           .then(results => {
-            resolve(results.map(transformDevice));
+            resolve(results.map(transformEntity));
           })
           .catch(reject);
       })
@@ -209,10 +209,10 @@ const getDevices = () => {
   });
 };
 
-const startObserving = (deviceId, onData, onClose) => {
+const startObserving = (entityId, onData, onClose) => {
   const command = config.coapClient;
   const args = createParamList("get", null, true);
-  args.push(`"${getUri(config.gatewayIp, deviceId)}"`);
+  args.push(`"${getUri(config.gatewayIp, entityId)}"`);
   return streamProcessOutput(command, args, {
     onData: buffer => {
       // console.log("onData", buffer);
@@ -220,7 +220,7 @@ const startObserving = (deviceId, onData, onClose) => {
       const data = buffer.toString();
       const parsed = parseCoap(data);
       if (parsed.length) {
-        onData(transformDevice(parsed[parsed.length - 1]));
+        onData(transformEntity(parsed[parsed.length - 1]));
       }
     },
     onError: data => {
@@ -228,14 +228,24 @@ const startObserving = (deviceId, onData, onClose) => {
       if ((str.length > 2 && str.startsWith("v:")) || str.length <= 2) {
         // ignore, this is normal data
       } else {
-        console.error("observe", deviceId, str);
+        console.error("observe", entityId, str);
       }
     },
     onClose
   });
 };
 
-const api = { getDevices, setDeviceState, startObserving };
+const isObservable = entity => {
+  return entity.subtype === "light" || entity.subtype === "outlet";
+};
+
+const api = {
+  getEntities,
+  setEntityState,
+  startObserving,
+  transformEntity,
+  isObservable
+};
 
 const initialize = (conf, done) => {
   config = conf;
