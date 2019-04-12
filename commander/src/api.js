@@ -30,7 +30,7 @@ const onDataCreator = (dbInstance, entity) => data => {
 };
 
 // TODO refactor to integration
-const startListeningEntity = (integration, intKey, dbInstance, entity) => {
+const startListeningEntity = (intKey, dbInstance, entity) => {
   const onData = onDataCreator(dbInstance, entity);
   const onClose = code => {
     let delay = 1000 + Math.round(Math.random() * 5000);
@@ -52,7 +52,7 @@ const startListeningEntity = (integration, intKey, dbInstance, entity) => {
   };
   function startListener() {
     console.log("Start listening", entity.id, entity.entityId);
-    observed[intKey][entity.id] = integration.startObserving(
+    observed[intKey][entity.id] = integrations[intKey].startObserving(
       entity.entityId,
       onData,
       onClose
@@ -71,11 +71,12 @@ const getRefreshDelay = (defaultDelay, quietDelay) => {
 
 const INITIAL_LISTENING_DELAY = 500;
 
-const startListening = (integration, intKey, dbInstance, entities) => {
+const startListening = (intKey, dbInstance, entities) => {
+  const integration = integrations[intKey];
   entities.forEach((entity, i) => {
     if (integration.isObservable(entity)) {
       setTimeout(() => {
-        startListeningEntity(integration, intKey, dbInstance, entity);
+        startListeningEntity(intKey, dbInstance, entity);
         setTimeout(() => {
           stopListening(intKey, entity.id);
         }, 10000 + Math.random() * 30000);
@@ -219,10 +220,10 @@ const startServer = () => {
   app.listen(port);
 };
 
-const doSync = (integration, intKey, dbInstance, cb) => {
+const doSync = (intKey, dbInstance, cb) => {
   // console.log("Starting sync for", intKey);
   let savedEntities = [];
-  integration
+  integrations[intKey]
     .getEntities()
     .then(entities => {
       savedEntities = dbInstance.syncEntities(intKey, entities);
@@ -241,10 +242,9 @@ dbFactory.initialize(dbInstance => {
     console.log("Initialized integrations", Object.keys(integrations));
     Object.keys(integrations).forEach(intKey => {
       observed[intKey] = {};
-      const integration = integrations[intKey];
-      doSync(integration, intKey, dbInstance, entities => {
+      doSync(intKey, dbInstance, entities => {
         setTimeout(() => {
-          startListening(integration, intKey, dbInstance, entities);
+          startListening(intKey, dbInstance, entities);
         }, 2000);
       });
     });

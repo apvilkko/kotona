@@ -51,14 +51,16 @@ const syncEntities = (intKey, entities) => {
   entities.forEach(entity => {
     const existing = db
       .getCollection(collection)
-      .findOne({ entityId: entity.entityId });
+      .findOne({ entityId: entity.entityId, integration: intKey });
     if (existing) {
+      console.log("found existing", entity.entityId, intKey);
       saveEntity(collection, {
         ...existing,
         name: entity.name,
         data: entity.data
       });
     } else {
+      console.log("saving new", entity.entityId, intKey);
       saveEntity(collection, {
         ...entity,
         type: "entity",
@@ -67,7 +69,7 @@ const syncEntities = (intKey, entities) => {
     }
   });
   console.log(`Synced ${entities.length} entities.`);
-  return db.getCollection(collection, { integration: intKey }).find();
+  return db.getCollection(collection).find({ integration: intKey });
 };
 
 const api = {
