@@ -48,7 +48,7 @@ export default ({ colors, value, handleChange }) => {
   }
 
   return (
-    <>
+    <div className="color-modal-toggle-container">
       <button
         className="color-modal-toggle"
         type="button"
@@ -72,6 +72,6 @@ export default ({ colors, value, handleChange }) => {
           </Modal>
         </ClickOutside>
       ) : null}
-    </>
+    </div>
   );
 };

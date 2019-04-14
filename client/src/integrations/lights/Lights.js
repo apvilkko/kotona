@@ -170,9 +170,17 @@ const StyledLightControl = styled(LightControl)`
   height: 4.3rem;
   border: ${p => p.theme.box.border};
   border-radius: ${p => p.theme.box.borderRadius};
-  text-align: center;
+  justify-content: flex-start;
+  align-items: center;
+
+  .color-modal-toggle-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
 
   & .light-toggle {
+    width: 100%;
     padding-top: 0.2em;
     padding-bottom: 0.1em;
     border: none;
@@ -181,11 +189,18 @@ const StyledLightControl = styled(LightControl)`
   }
 
   & .color-modal-toggle {
-    width: 100%;
-    height: 1.5rem;
+    display: block;
+    width: 1.2rem;
+    height: 1.2rem;
     border: none;
     border-radius: ${p => p.theme.box.borderRadius};
     position: relative;
+
+  }
+
+  &.light-on .color-modal-toggle {
+    width: 100%;
+    height: 1.45rem;
     &:after {
       display: block;
       content: '';
