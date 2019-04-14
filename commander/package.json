@@ -18,6 +18,8 @@
     "express-ws": "^4.0.0",
     "lokijs": "^1.5.6",
     "node-fetch": "^2.3.0",
+    "node-pty": "^0.8.1",
+    "strip-ansi": "^5.2.0",
     "tree-kill": "^1.2.1",
     "uuid": "^3.3.2"
   },
