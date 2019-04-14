@@ -10,7 +10,7 @@ const colors = {
 
 export default {
   fonts: {
-    baseSize: "30px",
+    baseSize: "22px",
     baseFamily: "'Oxygen', sans-serif"
   },
   colors: {
