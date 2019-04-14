@@ -31,4 +31,4 @@ const getColorChoices = entity => {
   return null;
 };
 
-export { getColorChoices };
+export { getColorChoices, COLD_WARM_COLORS };

@@ -1,23 +1,44 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import styled from "styled-components";
-import Button from "../../components/Button";
 import LabeledInput from "../../components/LabeledInput";
 import Loading from "../../components/Loading";
+import BoxColumn from "../../components/BoxColumn";
+import BoxRow from "../../components/BoxRow";
 import useFetch from "../../hooks/useFetch";
 import useWebSocket from "../../hooks/useWebSocket";
 import throttle from "../../utils/throttle";
 import isEqual from "../../utils/isEqual";
-import { getColorChoices } from "./tradfri";
+import { getColorChoices, COLD_WARM_COLORS } from "./tradfri";
 import ColorChanger from "./ColorChanger";
 
 const integration = "lights/tradfri";
 
-const StyledRange = styled("input")`
-  -webkit-appearance: none !important;
-  border: 1px solid white;
-  background: #222;
-  height: 2.5em;
-  width: 15em;
+const thumbStyle = p => `
+  border: none;
+  height: 1rem;
+  width: 0.5rem;
+  border-radius: 3px;
+  background: ${p.theme.colors.accentLight};
+  cursor: pointer;
+`;
+
+const InputRange = ({ className, ...rest }) => (
+  <div className={className}>
+    <input {...rest} />
+  </div>
+);
+
+const StyledRange = styled(InputRange)`
+  display: inline-block;
+  width: 100%;
+  & > input[type=range] {
+    width: 98%;
+    border: none;
+    cursor: pointer;
+    height: 1rem;
+    &::-webkit-slider-thumb { ${p => thumbStyle(p)} }
+    &::-moz-range-thumb { ${p => thumbStyle(p)}
+  }
 `;
 
 const entityState = entity => ({
@@ -26,7 +47,7 @@ const entityState = entity => ({
   color: entity.color
 });
 
-const EntityControl = ({ entity, className }) => {
+const LightControl = ({ entity, className }) => {
   const { doRequest } = useFetch();
   const [request, setRequest] = useState({});
   const initState = entityState(entity);
@@ -116,13 +137,15 @@ const EntityControl = ({ entity, className }) => {
   }, [desiredState]);
 
   return (
-    <div className={className}>
-      <Button
-        color={uiState.on ? "green" : ""}
+    <BoxColumn className={`${className} ${uiState.on ? "light-on" : ""}`}>
+      <button
+        type="button"
+        className="light-toggle"
         onClick={() => setUiState({ ...uiState, on: !uiState.on })}
+        style={uiState.on ? { background: `#${uiState.color}` } : {}}
       >
         {entity.name}
-      </Button>
+      </button>
       <StyledRange
         type="range"
         min="0"
@@ -135,17 +158,62 @@ const EntityControl = ({ entity, className }) => {
         value={uiState.color}
         handleChange={color => setUiState({ ...uiState, color })}
       />
-    </div>
+    </BoxColumn>
   );
 };
 
-const StyledEntityControl = styled(EntityControl)`
+const StyledLightControl = styled(LightControl)`
   margin-bottom: 0.2em;
+  margin-right: 0.2em;
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  & > * {
-    margin-left: 0.5em;
+  width: 10em;
+  height: 4.3rem;
+  border: ${p => p.theme.box.border};
+  border-radius: ${p => p.theme.box.borderRadius};
+  text-align: center;
+
+  & .light-toggle {
+    padding-top: 0.2em;
+    padding-bottom: 0.1em;
+    border: none;
+    background: none;
+    border-radius: ${p => p.theme.box.borderRadius};
+  }
+
+  & .color-modal-toggle {
+    width: 100%;
+    height: 1.5rem;
+    border: none;
+    border-radius: ${p => p.theme.box.borderRadius};
+    position: relative;
+    &:after {
+      display: block;
+      content: '';
+      position: absolute;
+      top: 0
+      left: 0;
+      height: 50%;
+      width: 100%;
+      z-index: -1;
+      background: inherit;
+    }
+  }
+
+  &.light-on .light-toggle {
+    background: #${COLD_WARM_COLORS[0]};
+    color: ${p => p.theme.colors.dark};
+    position: relative;
+    &:after {
+      display: block;
+      content: '';
+      position: absolute;
+      bottom: 0
+      left: 0;
+      height: 50%;
+      width: 100%;
+      z-index: -1;
+      background: inherit;
+    }
   }
 `;
 
@@ -170,7 +238,6 @@ export default () => {
   const [lightsOnly, setLightsOnly] = useState(true);
   const { doFetch, data, setData, isLoading } = useFetch();
   const [filtered, setFiltered] = useState([]);
-  const [message, setMessage] = useState({});
   const { jsonData } = useWebSocket();
 
   const fetchAll = useCallback(() => {
@@ -206,11 +273,11 @@ export default () => {
 
   if (!data || isLoading) return <Loading />;
   return (
-    <div>
+    <BoxRow top>
       {/* <StyledFilters lightsOnly={lightsOnly} setLightsOnly={setLightsOnly} /> */}
       {filtered.map(entity => (
-        <StyledEntityControl key={entity.id} entity={entity} />
+        <StyledLightControl key={entity.id} entity={entity} />
       ))}
-    </div>
+    </BoxRow>
   );
 };

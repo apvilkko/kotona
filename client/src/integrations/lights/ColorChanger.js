@@ -4,9 +4,9 @@ import Closer from "../../components/Closer";
 import ClickOutside from "../../components/ClickOutside";
 
 const Color = styled("button")`
-  height: 3rem;
-  width: 3rem;
-  border-radius: 1.5rem;
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 1.25rem;
   display: inline-block;
   border-color: transparent;
 `;
@@ -16,12 +16,13 @@ const Modal = styled("div")`
   padding: 1em;
   top: 2rem;
   left: 2rem;
-  width: 12em;
-  height: 10em;
-  background: black;
+  width: 14em;
+  height: 80vh;
+  background: ${p => p.theme.modal.bg};
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  z-index: 100;
 `;
 
 const ColorSelect = styled("div")`
@@ -47,8 +48,9 @@ export default ({ colors, value, handleChange }) => {
   }
 
   return (
-    <span>
-      <Color
+    <>
+      <button
+        className="color-modal-toggle"
         type="button"
         onClick={() => setModalOpen(!modalOpen)}
         style={{ background: `#${value}` }}
@@ -70,6 +72,6 @@ export default ({ colors, value, handleChange }) => {
           </Modal>
         </ClickOutside>
       ) : null}
-    </span>
+    </>
   );
 };

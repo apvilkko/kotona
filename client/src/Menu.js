@@ -13,6 +13,7 @@ const Opener = styled(({ className, handleClick }) => (
   </BaseButton>
 ))`
   border: none;
+  color: ${p => p.theme.colors.dark};
 `;
 
 const Menu = ({ className }) => {
@@ -56,7 +57,8 @@ export default styled(Menu)`
   text-align: right;
   padding-right: ${p => p.theme.bodyPadding};
   padding-left: ${p => p.theme.bodyPadding};
-  background: ${p => p.theme.colorBg};
+  background: ${p => p.theme.colors.bg};
+  z-index: 90;
 
   ul {
     margin-top: 1em;

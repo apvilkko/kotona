@@ -3,6 +3,10 @@ import styled from "styled-components";
 import ReactSVG from "react-svg";
 import isEmpty from "../../utils/isEmpty";
 import Loading from "../../components/Loading";
+import Spacer from "../../components/Spacer";
+import Smaller from "../../components/Smaller";
+import BoxColumn from "../../components/BoxColumn";
+import BoxRow from "../../components/BoxRow";
 import useFetch from "../../hooks/useFetch";
 import useWebSocket from "../../hooks/useWebSocket";
 import getIcon from "./getIcon";
@@ -33,35 +37,10 @@ const Icon = ({ icon, size = "md" }) => (
   />
 );
 
-const Smaller = styled("small")`
-  display: inline-block;
-  text-align: ${p => (p.center ? "center" : "left")};
-`;
-
-const Box = ({ className, children }) => (
-  <div className={className}>{children}</div>
-);
-
-const BoxColumn = styled(Box)`
-  display: flex;
-  flex-direction: column;
-`;
-
-const BoxRow = styled(Box)`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`;
-const Spacer = styled("span")`
-  display: ${p => (p.vertical ? "block" : "inline-block")};
-  width: 0.5ch;
-  height: ${p => (p.vertical ? "1ch" : "auto")};
-`;
-
 const WeatherBox = ({ w, data, forecast, className }) => {
   return (
     <BoxColumn className={className}>
-      <Smaller center>{time(data.time, w.timezone, forecast)}</Smaller>
+      <div className="box-title">{time(data.time, w.timezone, forecast)}</div>
       <BoxRow>
         <span>
           <Icon icon={data.icon} />
@@ -70,54 +49,78 @@ const WeatherBox = ({ w, data, forecast, className }) => {
           {forecast ? (
             <>
               <span>
-                <span>{data.temperatureHigh.toFixed(0)}°</span>
+                <span className="temperature-2">
+                  {data.temperatureHigh.toFixed(0)}°
+                </span>
                 <Spacer />
                 <Smaller>{data.apparentTemperatureHigh.toFixed(0)}°</Smaller>
               </span>
               <span>
-                <span>{data.temperatureLow.toFixed(0)}°</span>
+                <span className="temperature-2">
+                  {data.temperatureLow.toFixed(0)}°
+                </span>
                 <Spacer />
                 <Smaller>{data.apparentTemperatureLow.toFixed(0)}°</Smaller>
               </span>
             </>
           ) : (
             <span>
-              <span>{data.temperature.toFixed(0)}°</span>
+              <span className="temperature">
+                {data.temperature.toFixed(0)}°
+              </span>
               <Spacer />
               <Smaller>{data.apparentTemperature.toFixed(0)}°</Smaller>
             </span>
           )}
 
-          <Smaller>
+          <Smaller dimmer>
             <Icon icon={"wind"} size="sm" /> {data.windSpeed.toFixed(0)}
           </Smaller>
-          <Smaller>{(data.humidity * 100).toFixed(0)}%</Smaller>
+          <Smaller dimmer>{(data.humidity * 100).toFixed(0)}%</Smaller>
         </BoxColumn>
       </BoxRow>
     </BoxColumn>
   );
 };
 
+const StyledWeatherBox = styled(WeatherBox)`
+  font-size: 1.2rem;
+  line-height: 1.1;
+  border: ${p => p.theme.box.border};
+  border-radius: ${p => p.theme.box.borderRadius};
+  padding: 0.2em;
+  & svg {
+    margin: -0.5rem;
+  }
+  .box-title {
+    text-align: center;
+    margin-bottom: 0.2rem;
+    font-size: 0.7rem;
+    color: ${p => p.theme.colors.dimmer};
+  }
+  .temperature {
+    font-size: 1.7rem;
+  }
+  .temperature-2 {
+    font-size: 1.5rem;
+  }
+`;
+
 const CurrentlyComp = ({ w, className }) => (
-  <WeatherBox w={w} data={w.currently} className={className} />
+  <StyledWeatherBox w={w} data={w.currently} className={className} />
 );
 const DailyComp = ({ w, data, className }) => (
-  <WeatherBox w={w} data={data} forecast className={className} />
+  <StyledWeatherBox w={w} data={data} forecast className={className} />
 );
 
 const Currently = styled(CurrentlyComp)`
-  width: 33vw;
-  border: 0.2em solid #555;
-  border-radius: 1em;
-  padding: 0.2em;
+  width: 8em;
 `;
 
 const Daily = styled(DailyComp)`
-  width: 25vw;
-  margin-right: 1rem;
-  border: 0.2em solid #555;
-  border-radius: 1em;
-  padding: 0.1em;
+  width: 6.5em;
+  margin-right: 0.2rem;
+  margin-bottom: 0.2rem;
 `;
 
 export default () => {
@@ -133,7 +136,9 @@ export default () => {
   }, []);
 
   useEffect(() => {
-    setData([jsonData]);
+    if (jsonData && jsonData.id === 1) {
+      setData([jsonData]);
+    }
   }, [jsonData]);
 
   if (isEmpty(data) || isEmpty(data[0]) || isLoading) {
@@ -143,10 +148,6 @@ export default () => {
 
   return (
     <div>
-      <Smaller>
-        {w.latitude}°, {w.longitude}°
-      </Smaller>
-      <Spacer vertical />
       <Currently w={w} />
       <Spacer vertical />
       <BoxRow>
@@ -154,6 +155,10 @@ export default () => {
           i < 4 ? <Daily key={day.time} w={w} data={day} /> : null
         )}
       </BoxRow>
+      <Spacer vertical />
+      <Smaller dimmer>
+        {w.latitude.toFixed(4)}°, {w.longitude.toFixed(4)}°
+      </Smaller>
     </div>
   );
 };

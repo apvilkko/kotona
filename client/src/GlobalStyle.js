@@ -1,6 +1,10 @@
 import { createGlobalStyle } from "styled-components";
 
 export default createGlobalStyle`
+  html {
+    font-size: ${p => p.theme.fonts.baseSize};
+  }
+
   html, body, #app {
     height: 100%;
     box-sizing: border-box;
@@ -11,24 +15,18 @@ export default createGlobalStyle`
   }
 
   body {
-    font-family: ${p => p.theme.fontFamily};
-    @media screen and (orientation: portrait) {
-      font-size: 5vw;
-    }
-    @media screen and (orientation: landscape) {
-      font-size: 5vh;
-    }
-    background: ${p => p.theme.colorBg};
-    color: ${p => p.theme.colorPrimary};
+    font-family: ${p => p.theme.fonts.baseFamily};
+    background: ${p => p.theme.colors.bg};
+    color: ${p => p.theme.colors.text};
   }
 
   small {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
 
   .icon {
-    stroke: ${p => p.theme.colorPrimary};
-    fill: ${p => p.theme.colorPrimary};
+    stroke: ${p => p.theme.colors.accentLight};
+    fill: ${p => p.theme.colors.accentLight};
   }
 
   .icon-sm {
@@ -39,7 +37,13 @@ export default createGlobalStyle`
     margin: -0.3rem
   }
 
+  button {
+    color: ${p => p.theme.colors.text};
+    font-size: ${p => p.theme.fonts.baseSize};
+    font-family: ${p => p.theme.fonts.baseFamily};
+  }
+
   a {
-    color: ${p => p.theme.colorPrimary};
+    color: ${p => p.theme.colors.link};
   }
 `;
