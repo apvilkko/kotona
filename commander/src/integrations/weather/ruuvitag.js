@@ -3,6 +3,8 @@ const pty = require("node-pty");
 const stripAnsi = require("strip-ansi");
 const shell = "bash";
 
+const integration = "weather/ruuvitag";
+
 let config;
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -53,6 +55,7 @@ const readBluetoothctl = devices =>
       expectedDevice = devices[i].addr.toUpperCase();
       deviceData[expectedDevice] = {
         entityId: expectedDevice,
+        integration,
         name: devices[i].name,
         data: []
       };
@@ -71,14 +74,13 @@ const readBluetoothctl = devices =>
         ret.push(data);
       }
     });
-    console.log("ruuvitags: ", ret);
     resolve(ret);
   });
 
 const getEntities = () => {
   if (config.dummy) {
     return new Promise((resolve, reject) => {
-      return resolve([transformEntity(require("./forecast.json"))]);
+      return resolve(require("./ruuvitag.json"));
     });
   } else {
     return readBluetoothctl(config.devices);
@@ -86,11 +88,11 @@ const getEntities = () => {
 };
 
 const pollingUpdate = (entity, onData) => {
-  console.log("pollingUpdate", entity.entityId);
+  console.log("pollingUpdate");
   getEntities().then(entities => {
     entities.forEach(entity => {
       if (entity) {
-        onData(entity);
+        onData[entity.entityId](entity);
       }
     });
   });

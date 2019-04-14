@@ -18,7 +18,7 @@ let db = null;
 const observed = {};
 const socket = {};
 
-const onDataCreator = (dbInstance, entity) => data => {
+const onDataCreator = dbInstance => entity => data => {
   // console.log("update", entity.id, entity.entityId, data);
   const updated = dbInstance.updateEntityData(entity.id, data);
   if (socket.ws && socket.ws.readyState !== 1) {
@@ -31,7 +31,7 @@ const onDataCreator = (dbInstance, entity) => data => {
 
 // TODO refactor to integration
 const startListeningEntity = (intKey, dbInstance, entity) => {
-  const onData = onDataCreator(dbInstance, entity);
+  const onData = onDataCreator(dbInstance)(entity);
   const onClose = code => {
     let delay = 1000 + Math.round(Math.random() * 5000);
     if (
@@ -73,37 +73,58 @@ const INITIAL_LISTENING_DELAY = 500;
 
 const startListening = (intKey, dbInstance, entities) => {
   const integration = integrations[intKey];
-  entities.forEach((entity, i) => {
-    if (integration.isObservable(entity)) {
+  if (integration.config.polling && integration.config.polling.all) {
+    const updaters = {};
+    entities.forEach(entity => {
+      updaters[entity.entityId] = onDataCreator(dbInstance)(entity);
+    });
+    const doPollingUpdate = () => {
+      integration.pollingUpdate(null, updaters);
+      const nextDelay = getRefreshDelay(
+        integration.config.polling.default,
+        integration.config.polling.quiet
+      );
       setTimeout(() => {
-        startListeningEntity(intKey, dbInstance, entity);
+        doPollingUpdate();
+      }, nextDelay);
+    };
+    setTimeout(doPollingUpdate, INITIAL_LISTENING_DELAY);
+  } else {
+    entities.forEach((entity, i) => {
+      if (integration.isObservable(entity)) {
         setTimeout(() => {
-          stopListening(intKey, entity.id);
-        }, 10000 + Math.random() * 30000);
-        const refreshByInterval = delay => {
+          startListeningEntity(intKey, dbInstance, entity);
           setTimeout(() => {
-            console.log("interval refresh listener");
             stopListening(intKey, entity.id);
-            refreshByInterval(getRefreshDelay());
-          }, delay);
+          }, 10000 + Math.random() * 30000);
+          const refreshByInterval = delay => {
+            setTimeout(() => {
+              console.log("interval refresh listener");
+              stopListening(intKey, entity.id);
+              refreshByInterval(getRefreshDelay());
+            }, delay);
+          };
+          refreshByInterval(getRefreshDelay());
+        }, i * INITIAL_LISTENING_DELAY);
+      } else if (
+        integration.config.polling &&
+        !integration.config.polling.all
+      ) {
+        const onData = onDataCreator(dbInstance)(entity);
+        const doPollingUpdate = () => {
+          integration.pollingUpdate(entity, onData);
+          const nextDelay = getRefreshDelay(
+            integration.config.polling.default,
+            integration.config.polling.quiet
+          );
+          setTimeout(() => {
+            doPollingUpdate();
+          }, nextDelay);
         };
-        refreshByInterval(getRefreshDelay());
-      }, i * INITIAL_LISTENING_DELAY);
-    } else if (integration.config.polling) {
-      const onData = onDataCreator(dbInstance, entity);
-      const doPollingUpdate = () => {
-        integration.pollingUpdate(entity, onData);
-        const nextDelay = getRefreshDelay(
-          integration.config.polling.default,
-          integration.config.polling.quiet
-        );
-        setTimeout(() => {
-          doPollingUpdate();
-        }, nextDelay);
-      };
-      setTimeout(doPollingUpdate, INITIAL_LISTENING_DELAY);
-    }
-  });
+        setTimeout(doPollingUpdate, INITIAL_LISTENING_DELAY);
+      }
+    });
+  }
 };
 
 const stopListening = (intKey, dbId, restartImmediately) =>

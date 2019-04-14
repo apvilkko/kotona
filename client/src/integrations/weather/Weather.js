@@ -10,6 +10,7 @@ import BoxRow from "../../components/BoxRow";
 import useFetch from "../../hooks/useFetch";
 import useWebSocket from "../../hooks/useWebSocket";
 import getIcon from "./getIcon";
+import RuuviTag from "./RuuviTag";
 
 const integration = "weather/darksky";
 
@@ -148,7 +149,11 @@ export default () => {
 
   return (
     <div>
-      <Currently w={w} />
+      <BoxRow>
+        <Currently w={w} />
+        <Spacer big />
+        <RuuviTag jsonData={jsonData} />
+      </BoxRow>
       <Spacer vertical />
       <BoxRow>
         {w.daily.data.map((day, i) =>

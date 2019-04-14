@@ -8,15 +8,22 @@ module.exports = () => ({
   integrations: [
     {
       plugin: "lights/tradfri",
-      enabled: false
-    },
-    {
-      plugin: "weather/ruuvitag",
       enabled: true
     },
     {
+      plugin: "weather/ruuvitag",
+      enabled: true,
+      dummy: false,
+      polling: {
+        all: true,
+        default: 5 * 60 * 1000,
+        quiet: 15 * 60 * 1000
+      }
+    },
+    {
       plugin: "weather/darksky",
-      dummy: true,
+      enabled: true,
+      dummy: false,
       readOnly: true,
       polling: {
         default: 10 * 60 * 1000,
