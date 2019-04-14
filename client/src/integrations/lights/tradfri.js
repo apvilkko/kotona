@@ -23,9 +23,9 @@ const RGB_COLORS = [
 ];
 
 const getColorChoices = entity => {
-  if (entity.model.includes("bulb") && entity.model.includes("CWS")) {
+  if (entity.model.includes("CWS")) {
     return RGB_COLORS;
-  } else if (entity.model.includes("bulb") && entity.model.includes("WS")) {
+  } else if (entity.model.includes("WS")) {
     return COLD_WARM_COLORS;
   }
   return null;
