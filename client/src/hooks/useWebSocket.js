@@ -1,44 +1,57 @@
 import { useCallback, useState, useEffect } from "react";
 
 const useWebsocket = () => {
-  const [socket, setSocket] = useState(
-    new WebSocket(`ws://${window.location.host}/ws/update`)
-  );
+  const [socket, setSocket] = useState(null);
   const [jsonData, setJsonData] = useState(null);
+  const [status, setStatus] = useState(null);
 
   const onSocketClose = useCallback(() => {
+    setStatus("closed");
     console.log("ws close, reloading");
-    return setTimeout(() => {
+    setTimeout(() => {
       window.location.reload(false);
     }, 1000);
   });
 
-  useEffect(() => {
-    socket.addEventListener("open", evt => {
-      console.log("socket opened", evt);
-    });
-    socket.addEventListener("message", evt => {
-      if (evt && evt.data) {
-        const jsonData = JSON.parse(evt.data);
-        if (jsonData.id) {
-          // console.log("set data from update");
-          setJsonData(jsonData);
-        }
+  const onMessage = useCallback(evt => {
+    if (evt && evt.data) {
+      const jsonData = JSON.parse(evt.data);
+      if (jsonData.id) {
+        // console.log("set data from update");
+        setJsonData(jsonData);
       }
-    });
-    socket.addEventListener("close", onSocketClose);
-    socket.addEventListener("error", e => {
+    }
+  });
+
+  const onError = useCallback(
+    e => {
       console.log("ws error", e);
+      setStatus(`error ${e}`);
       socket.close();
-    });
+    },
+    [socket]
+  );
+
+  const onOpen = useCallback(evt => {
+    console.log("socket opened", evt);
+    setStatus("open");
+  });
+
+  useEffect(() => {
+    let ws = new WebSocket(`ws://${window.location.host}/ws/update`);
+    ws.addEventListener("open", onOpen);
+    ws.addEventListener("message", onMessage);
+    ws.addEventListener("close", onSocketClose);
+    ws.addEventListener("error", onError);
+    setSocket(ws);
     return () => {
       console.log("closing socket");
-      socket.removeEventListener("close", onSocketClose);
-      socket.close();
+      ws.removeEventListener("close", onSocketClose);
+      ws.close();
     };
   }, []);
 
-  return { socket, jsonData };
+  return { socket, jsonData, status };
 };
 
 export default useWebsocket;

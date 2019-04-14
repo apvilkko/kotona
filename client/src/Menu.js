@@ -14,6 +14,7 @@ const Opener = styled(({ className, handleClick }) => (
 ))`
   border: none;
   color: ${p => p.theme.colors.dark};
+  background: none;
 `;
 
 const Menu = ({ className }) => {
@@ -23,7 +24,7 @@ const Menu = ({ className }) => {
     <div className={className}>
       {menuOpen ? (
         <ClickOutside onClick={() => setMenuOpen(false)}>
-          <div>
+          <div className="menu">
             <Closer handleClick={() => setMenuOpen(false)} />
             <ul>
               {PAGES.map(page => (
@@ -57,8 +58,11 @@ export default styled(Menu)`
   text-align: right;
   padding-right: ${p => p.theme.bodyPadding};
   padding-left: ${p => p.theme.bodyPadding};
-  background: ${p => p.theme.colors.bg};
   z-index: 90;
+
+  .menu {
+    background: ${p => p.theme.colors.bg};
+  }
 
   ul {
     margin-top: 1em;

@@ -42,7 +42,7 @@ const startListeningEntity = (intKey, dbInstance, entity) => {
     }
     if (code === 0) {
       // process exited so probably some kind of problem
-      delay = 10 * 60 * 1000;
+      delay = 60 * 1000;
     }
     console.log("close", code, intKey, delay);
     setTimeout(() => {

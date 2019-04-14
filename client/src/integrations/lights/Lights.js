@@ -249,11 +249,27 @@ const StyledFilters = styled(Filters)`
   margin-bottom: 0.5em;
 `;
 
+const DebugComp = ({ message, className }) => (
+  <div className={className}>{message}</div>
+);
+
+const Debug = styled(DebugComp)`
+  position: fixed;
+  font-size: 0.8rem;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  height: 2rem;
+  width: 95vw;
+  padding: 0.2em;
+  border: 1px solid #444;
+`;
+
 export default () => {
   const [lightsOnly, setLightsOnly] = useState(true);
   const { doFetch, data, setData, isLoading } = useFetch();
   const [filtered, setFiltered] = useState([]);
-  const { jsonData } = useWebSocket();
+  const { jsonData, status } = useWebSocket();
+  const [debugMessage, setDebugMessage] = useState(null);
 
   const fetchAll = useCallback(() => {
     doFetch(`/api/entities?type=${encodeURIComponent(integration)}`);
@@ -262,6 +278,10 @@ export default () => {
   useEffect(() => {
     fetchAll();
   }, []);
+
+  useEffect(() => {
+    setDebugMessage(`ws: ${status}`);
+  }, [status]);
 
   useEffect(() => {
     setData(data => {
@@ -288,11 +308,14 @@ export default () => {
 
   if (!data || isLoading) return <Loading />;
   return (
-    <BoxRow top>
-      {/* <StyledFilters lightsOnly={lightsOnly} setLightsOnly={setLightsOnly} /> */}
-      {filtered.map(entity => (
-        <StyledLightControl key={entity.id} entity={entity} />
-      ))}
-    </BoxRow>
+    <>
+      <BoxRow top>
+        {/* <StyledFilters lightsOnly={lightsOnly} setLightsOnly={setLightsOnly} /> */}
+        {filtered.map(entity => (
+          <StyledLightControl key={entity.id} entity={entity} />
+        ))}
+      </BoxRow>
+      {/* <Debug message={debugMessage} /> */}
+    </>
   );
 };
