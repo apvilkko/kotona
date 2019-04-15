@@ -39,6 +39,17 @@ const TagComp = ({ className, item }) => {
         </div>
         <Spacer />
         <Smaller dimmer>{getHumidity(data).toFixed(1)}%</Smaller>
+        <Spacer />
+        <Smaller dimmer>
+          (
+          {new Date(item.meta.updated).toLocaleString("fi", {
+            month: "numeric",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+          })}
+          )
+        </Smaller>
       </div>
     </BoxRow>
   );
