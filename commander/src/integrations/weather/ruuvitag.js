@@ -38,13 +38,17 @@ const readBluetoothctl = devices =>
         if (line.startsWith(`Device ${expectedDevice}`)) {
           currentDevice = expectedDevice;
         }
-        if (line.startsWith("ManufacturerData Value") && isOk(currentDevice)) {
+        if (
+          currentDevice &&
+          line.startsWith("ManufacturerData Value") &&
+          isOk(currentDevice)
+        ) {
           deviceData[currentDevice].data.push(line.substr(line.length - 4, 4));
         }
       });
     });
 
-    term.write("bluetoothctl\r");
+    term.write(" bluetoothctl\r");
     await sleep(300);
     term.write("power on\r");
     await sleep(2000);
@@ -63,9 +67,12 @@ const readBluetoothctl = devices =>
       await sleep(1000);
     }
 
+    term.write("scan off\r");
+    await sleep(1000);
+
     term.write("exit\r");
     await sleep(300);
-    term.write("exit\r");
+    term.write(" exit\r");
 
     const ret = [];
     Object.keys(deviceData).forEach(key => {
