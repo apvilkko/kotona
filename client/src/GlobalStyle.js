@@ -46,4 +46,20 @@ export default createGlobalStyle`
   a {
     color: ${p => p.theme.colors.link};
   }
+
+  ::-webkit-scrollbar {
+    height: 0.2rem;
+    width: 0.2rem;
+    background: ${p => p.theme.colors.bg};
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: ${p => p.theme.colors.dark};
+    -webkit-border-radius: 0.15rem;
+    -webkit-box-shadow: none;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: ${p => p.theme.colors.bg};
+  }
 `;
