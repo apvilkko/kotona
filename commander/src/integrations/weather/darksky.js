@@ -27,7 +27,11 @@ const fetchData = (resolve, reject, retries = 0) => {
 const getEntities = () => {
   if (config.dummy) {
     return new Promise((resolve, reject) => {
-      return resolve([transformEntity(require("./forecast.json"))]);
+      return resolve([
+        transformEntity(
+          require(`./forecast${Math.random() > 0.5 ? "" : "2"}.json`)
+        )
+      ]);
     });
   } else {
     return new Promise((resolve, reject) => fetchData(resolve, reject, 0));

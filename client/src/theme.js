@@ -1,5 +1,6 @@
 const colors = {
   bg: "#121517",
+  darker: "#262626",
   dark: "#424b54",
   medium: "#919eaa",
   dimmer: "#bababa",

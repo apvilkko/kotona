@@ -11,24 +11,10 @@ import useFetch from "../../hooks/useFetch";
 import useWebSocket from "../../hooks/useWebSocket";
 import getIcon from "./getIcon";
 import RuuviTag from "./RuuviTag";
+import WeatherChart from "./WeatherChart";
+import time from "./time";
 
 const integration = "weather/darksky";
-
-const time = (time, timezone, omitClock) => {
-  const opts = {
-    weekday: "short",
-    month: "numeric",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    timezone
-  };
-  if (omitClock) {
-    delete opts.hour;
-    delete opts.minute;
-  }
-  return new Date(time * 1000).toLocaleString("fi", opts);
-};
 
 const Icon = ({ icon, size = "md" }) => (
   <ReactSVG
@@ -37,6 +23,30 @@ const Icon = ({ icon, size = "md" }) => (
     wrapper="span"
   />
 );
+
+function cap(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+const Temperature = ({ amount, data, dataKey, variant = "" }) => {
+  const realKey = dataKey + variant;
+  const apparentKey = `apparent${cap(realKey)}`;
+  const realData = data[realKey].toFixed(0);
+  const apparentData = data[apparentKey].toFixed(0);
+  return (
+    <span>
+      <span className={`temperature${amount === 2 ? "-2" : ""}`}>
+        {realData}°
+      </span>
+      {apparentData !== realData ? (
+        <>
+          <Spacer />
+          <Smaller>{apparentData}°</Smaller>
+        </>
+      ) : null}
+    </span>
+  );
+};
 
 const WeatherBox = ({ w, data, forecast, className }) => {
   return (
@@ -49,31 +59,22 @@ const WeatherBox = ({ w, data, forecast, className }) => {
         <BoxColumn>
           {forecast ? (
             <>
-              <span>
-                <span className="temperature-2">
-                  {data.temperatureHigh.toFixed(0)}°
-                </span>
-                <Spacer />
-                <Smaller>{data.apparentTemperatureHigh.toFixed(0)}°</Smaller>
-              </span>
-              <span>
-                <span className="temperature-2">
-                  {data.temperatureLow.toFixed(0)}°
-                </span>
-                <Spacer />
-                <Smaller>{data.apparentTemperatureLow.toFixed(0)}°</Smaller>
-              </span>
+              <Temperature
+                amount={2}
+                data={data}
+                dataKey="temperature"
+                variant="High"
+              />
+              <Temperature
+                amount={2}
+                data={data}
+                dataKey="temperature"
+                variant="Low"
+              />
             </>
           ) : (
-            <span>
-              <span className="temperature">
-                {data.temperature.toFixed(0)}°
-              </span>
-              <Spacer />
-              <Smaller>{data.apparentTemperature.toFixed(0)}°</Smaller>
-            </span>
+            <Temperature data={data} dataKey="temperature" />
           )}
-
           <Smaller dimmer>
             <Icon icon={"wind"} size="sm" /> {data.windSpeed.toFixed(0)}
           </Smaller>
@@ -137,7 +138,7 @@ export default () => {
   }, []);
 
   useEffect(() => {
-    if (jsonData && jsonData.id === 1) {
+    if (jsonData && jsonData.integration === integration) {
       setData([jsonData]);
     }
   }, [jsonData]);
@@ -160,6 +161,8 @@ export default () => {
           i < 4 ? <Daily key={day.time} w={w} data={day} /> : null
         )}
       </BoxRow>
+      <Spacer vertical />
+      <WeatherChart w={w} />
       <Spacer vertical />
       <Smaller dimmer>
         {w.latitude.toFixed(4)}°, {w.longitude.toFixed(4)}°

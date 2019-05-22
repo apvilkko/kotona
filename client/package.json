@@ -12,9 +12,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "chart.js": "^2.8.0",
     "hammerjs": "^2.0.8",
     "parcel-bundler": "^1.12.3",
     "polished": "^3.0.4",
+    "ramda": "^0.26.1",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-router": "^5.0.0",
