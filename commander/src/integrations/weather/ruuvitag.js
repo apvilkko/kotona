@@ -73,6 +73,8 @@ const readBluetoothctl = devices =>
     term.write("exit\r");
     await sleep(300);
     term.write(" exit\r");
+    await sleep(1000);
+    term.kill();
 
     const ret = [];
     Object.keys(deviceData).forEach(key => {
