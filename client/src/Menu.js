@@ -38,7 +38,7 @@ const Menu = ({ className }) => {
                     window.location.reload(true);
                   }}
                 >
-                  refresh
+                  {t("Refresh")}
                 </Button>
               </li>
             </ul>

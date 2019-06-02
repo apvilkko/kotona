@@ -62,4 +62,17 @@ export default createGlobalStyle`
   ::-webkit-scrollbar-corner {
     background: ${p => p.theme.colors.bg};
   }
+
+  .react-simple-keyboard {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    .hg-button {
+      background: ${p => p.theme.colors.dark} !important;
+      span {
+        color: ${p => p.theme.colors.text} !important;
+      }
+    }
+
+  }
 `;

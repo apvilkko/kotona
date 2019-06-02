@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Loading from "./components/Loading";
 import Button from "./components/Button";
 import LabeledInput from "./components/LabeledInput";
 import useFetch from "./hooks/useFetch";
+import useKeyboard from "./hooks/useKeyboard";
 
 const CommandsContainer = ({ render, reload }) => {
   const { data, isLoading, error, doFetch } = useFetch();
@@ -53,16 +54,51 @@ const fields = [
 
 const CommandEditor = ({ currentData, onExit }) => {
   const [formData, setFormData] = useState(null);
+  const [focused, setFocused] = useState(null);
+
+  const setFormValue = useCallback((id, value) => {
+    setFormData({
+      ...formData,
+      [id]: value
+    });
+  });
+
+  const setter = useCallback(
+    value => {
+      console.log("setter", focused, value);
+      if (focused) {
+        setFormValue(focused, value);
+      }
+    },
+    [focused]
+  );
+
+  const {
+    setInput: setKeyboardInput,
+    handleChange: handleKeyChange,
+    handleKeyPress,
+    Keyboard
+  } = useKeyboard(setter);
 
   useEffect(() => {
     setFormData(currentData);
   }, [currentData]);
 
   const handleChange = id => evt => {
-    setFormData({
-      ...formData,
-      [id]: evt.target.value
-    });
+    const value = evt.target.value;
+    console.log("handleChange", id, value);
+    setFormValue(id, value);
+    setKeyboardInput(value);
+  };
+
+  const handleFocus = id => evt => {
+    console.log("handleFocus", id, evt);
+    setFocused(id);
+  };
+
+  const handleBlur = id => evt => {
+    console.log("handleBlur", id, evt);
+    setFocused(null);
   };
 
   if (formData === null) return null;
@@ -75,6 +111,8 @@ const CommandEditor = ({ currentData, onExit }) => {
         id={field.id}
         handleChange={handleChange}
         value={formData ? formData[field.id] : ""}
+        onFocus={handleFocus(field.id)}
+        onBlur={handleBlur(field.id)}
       />
     ));
 
@@ -85,6 +123,13 @@ const CommandEditor = ({ currentData, onExit }) => {
         <Button onClick={() => onExit()}>Cancel</Button>
         <Button onClick={() => onExit(formData)}>Save</Button>
       </div>
+      {true ? (
+        <Keyboard
+          inputName={focused}
+          onChange={handleKeyChange}
+          onKeyPress={handleKeyPress}
+        />
+      ) : null}
     </div>
   );
 };

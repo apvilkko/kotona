@@ -5,6 +5,8 @@ import theme from "./theme";
 import GlobalStyle from "./GlobalStyle";
 import NavigationContainer from "./NavigationContainer";
 
+import "react-simple-keyboard/build/css/index.css";
+
 export default () => (
   <BrowserRouter basename="ui">
     <ThemeProvider theme={theme}>
