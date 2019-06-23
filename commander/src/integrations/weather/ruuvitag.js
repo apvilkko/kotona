@@ -56,7 +56,8 @@ const readBluetooth = devices =>
         Object.keys(deviceData).forEach(key => {
           const data = deviceData[key];
           if (data && data.data && data.data.length > 1) {
-            ret.push(data);
+            // Remove preamble from data
+            ret.push(data.replace(/^(\d{0,4})(03)/, "$2"));
           }
         });
         console.log(`Read data from ${ret.length} ruuvitag devices.`);
