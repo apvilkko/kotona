@@ -55,7 +55,12 @@ const readBluetooth = devices =>
         const ret = [];
         Object.keys(deviceData).forEach(key => {
           const data = deviceData[key];
-          if (data && data.data && data.data.length > 1) {
+          if (
+            data &&
+            data.data &&
+            data.data.length > 1 &&
+            typeof data === "string"
+          ) {
             // Remove preamble from data
             ret.push(data.replace(/^(\d{0,4})(03)/, "$2"));
           }
