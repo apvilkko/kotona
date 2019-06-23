@@ -27,7 +27,15 @@ const TagComp = ({ className, item }) => {
   const [data, setData] = useState(item.data);
 
   useEffect(() => {
-    setData(item.data.map(Number));
+    if (Array.isArray(item.data)) {
+      setData(item.data.map(Number));
+    } else {
+      const hex = [];
+      for (let i = 0; i < item.data.length - 1; i += 2) {
+        hex.push("0x" + item.data[i] + item.data[i + 1]);
+      }
+      setData(hex.map(Number));
+    }
   }, [item]);
 
   return (
