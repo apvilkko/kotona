@@ -52,6 +52,15 @@ const readBluetooth = devices =>
       }
       setTimeout(() => {
         noble.stopScanning();
+        const ret = [];
+        Object.keys(deviceData).forEach(key => {
+          const data = deviceData[key];
+          if (data && data.data && data.data.length > 1) {
+            ret.push(data);
+          }
+        });
+        console.log(`Read data from ${ret.length} ruuvitag devices.`);
+        resolve(ret);
       }, 5000);
     });
 
@@ -65,16 +74,6 @@ const readBluetooth = devices =>
           p.advertisement.manufacturerData;
       }
     });
-
-    const ret = [];
-    Object.keys(deviceData).forEach(key => {
-      const data = deviceData[key];
-      if (data && data.data && data.data.length > 1) {
-        ret.push(data);
-      }
-    });
-    console.log(`Read data from ${ret.length} ruuvitag devices.`);
-    resolve(ret);
   });
 
 const getEntities = () => {
