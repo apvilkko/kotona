@@ -55,14 +55,8 @@ const readBluetooth = devices =>
         const ret = [];
         Object.keys(deviceData).forEach(key => {
           const data = deviceData[key];
-          if (
-            data &&
-            data.data &&
-            data.data.length > 1 &&
-            typeof data === "string"
-          ) {
-            // Remove preamble from data
-            ret.push(data.replace(/^(\d{0,4})(03)/, "$2"));
+          if (data && data.data && data.data.length > 1) {
+            ret.push(data);
           }
         });
         console.log(`Read data from ${ret.length} ruuvitag devices.`);
@@ -76,9 +70,12 @@ const readBluetooth = devices =>
         p.advertisement &&
         p.advertisement.manufacturerData
       ) {
+        // Remove preamble from data
         deviceData[
           p.address.toUpperCase()
-        ].data = p.advertisement.manufacturerData.toString("hex");
+        ].data = p.advertisement.manufacturerData
+          .toString("hex")
+          .replace(/^(\d{0,4})(03)/, "$2");
       }
     });
   });
