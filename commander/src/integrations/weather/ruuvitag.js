@@ -70,8 +70,9 @@ const readBluetooth = devices =>
         p.advertisement &&
         p.advertisement.manufacturerData
       ) {
-        deviceData[p.address.toUpperCase()].data =
-          p.advertisement.manufacturerData;
+        deviceData[
+          p.address.toUpperCase()
+        ].data = p.advertisement.manufacturerData.toString("hex");
       }
     });
   });
