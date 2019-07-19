@@ -201,6 +201,27 @@ const startServer = () => {
     }
   });
 
+  router.get("/integrations", (req, res) => {
+    const intKeys = {};
+    db.getCollection(ENTITIES).forEach(item => {
+      intKeys[item.integration] = true;
+    });
+    res.json(Object.keys(intKeys).sort());
+  });
+
+  router.get("/integrations/:key/entities", (req, res) => {
+    const dbEntities = db.getCollection(ENTITIES, {
+      integration: req.params.key
+    });
+    const mapped = dbEntities.map(item => ({
+      id: item.id,
+      name: item.name,
+      subtype: item.subtype
+    }));
+
+    res.json(sortBy("name")(mapped));
+  });
+
   router.get("/commands", (req, res) => {
     res.json(db.getCollection(COMMANDS));
   });

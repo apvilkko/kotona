@@ -11,7 +11,8 @@ const BaseButton = styled.button`
 const ActionButton = styled(BaseButton)`
   border-radius: 0.2em;
   border: 0.1em solid;
-  border-color: ${p => p.theme.colors.accentDark};
+  border-color: ${p =>
+    p.primary ? p.theme.colors.accentLight : p.theme.colors.accentDark};
   margin: 0 1em;
   padding: 0.25em 1em;
   box-shadow: 0 0 0.4em rgba(255, 255, 255, 0.4);

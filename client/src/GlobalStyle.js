@@ -47,6 +47,16 @@ export default createGlobalStyle`
     color: ${p => p.theme.colors.link};
   }
 
+  input {
+    background: ${p => p.theme.colors.bg};
+    color: ${p => p.theme.colors.text};
+    font-size: inherit;
+  }
+
+  label + input {
+    margin-left: 0.5rem;
+  }
+
   ::-webkit-scrollbar {
     height: 0.2rem;
     width: 0.2rem;

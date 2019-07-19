@@ -1,0 +1,20 @@
+{
+  "Weather": "Sää",
+  "Lights": "Valot",
+  "Home": "Koti",
+  "Commands": "Komennot",
+  "Refresh": "Päivitä sivu",
+  "Add command": "Lisää komento",
+  "Cancel": "Peruuta",
+  "Save": "Tallenna",
+  "Name": "Nimi",
+  "Edit": "Muokkaa",
+  "Remove": "Poista",
+  "Run": "Aja",
+  "Actions": "Toiminnot",
+  "Triggers": "Laukaisimet",
+  "Oneshot": "Kerta-ajo",
+  "Switch": "Kytkin",
+  "Type": "Tyyppi",
+  "Choose": "Valitse"
+}

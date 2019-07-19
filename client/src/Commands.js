@@ -3,6 +3,7 @@ import Loading from "./components/Loading";
 import Button from "./components/Button";
 import useFetch from "./hooks/useFetch";
 import CommandEditor from "./CommandEditor";
+import t from "./i18n";
 
 const CommandsContainer = ({ render, reload }) => {
   const { data, isLoading, error, doFetch } = useFetch();
@@ -19,9 +20,11 @@ const CommandsContainer = ({ render, reload }) => {
 const CommandListItem = ({ item, setEditing, remove, runCommand }) => (
   <div>
     {item.name}
-    <Button onClick={() => setEditing(item.id)}>Edit</Button>
-    <Button onClick={remove(item.id)}>Remove</Button>
-    <Button onClick={runCommand(item.id)}>Run</Button>
+    <Button onClick={() => setEditing(item.id)}>{t("Edit")}</Button>
+    <Button onClick={remove(item.id)}>{t("Remove")}</Button>
+    <Button primary onClick={runCommand(item.id)}>
+      {t("Run")}
+    </Button>
   </div>
 );
 
@@ -51,6 +54,11 @@ export default () => {
   const [reload, setReload] = useState("");
   const { doRequest, isLoading } = useFetch();
   const [pendingReload, setPendingReload] = useState(false);
+  const { doRequest: reqIntegrations, data: integrations } = useFetch();
+
+  useEffect(() => {
+    reqIntegrations({ url: "/api/integrations" });
+  }, []);
 
   useEffect(() => {
     if (!isLoading && pendingReload) {
@@ -92,6 +100,7 @@ export default () => {
         if (editing)
           return (
             <CommandEditor
+              integrations={integrations}
               current={editing}
               currentData={
                 editing === "newdata" ? {} : data.find(x => x.id === editing)
@@ -113,7 +122,9 @@ export default () => {
               runCommand={runCommand}
             />
             <div>
-              <Button onClick={() => setEditing("new")}>Add command</Button>
+              <Button onClick={() => setEditing("new")}>
+                {t("Add command")}
+              </Button>
             </div>
           </>
         );
