@@ -31,6 +31,11 @@ const onDataCreator = dbInstance => entity => data => {
 
 // TODO refactor to integration
 const startListeningEntity = (intKey, dbInstance, entity) => {
+  const integration = integrations[intKey];
+  if (integration.config.dummy && integration.config.dummyDb) {
+    console.log("Dummy, skip listening");
+    return;
+  }
   const onData = onDataCreator(dbInstance)(entity);
   const onClose = code => {
     let delay = 1000 + Math.round(Math.random() * 5000);
@@ -244,8 +249,15 @@ const startServer = () => {
 const doSync = (intKey, dbInstance, cb) => {
   // console.log("Starting sync for", intKey);
   let savedEntities = [];
-  integrations[intKey]
-    .getEntities()
+  const integration = integrations[intKey];
+  const useDummy = integration.config.dummy && integration.config.dummyDb;
+  const dummyGetter = () =>
+    new Promise((resolve, reject) => {
+      console.log("using dummy getter for", intKey);
+      resolve(dbInstance.getCollection(ENTITIES, { integration: intKey }));
+    });
+  const getter = useDummy ? dummyGetter : integration.getEntities;
+  getter()
     .then(entities => {
       savedEntities = dbInstance.syncEntities(intKey, entities);
       cb(savedEntities);
