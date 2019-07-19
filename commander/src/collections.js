@@ -1,1 +1,1 @@
-module.exports = ["entities", "groups", "tasks", "commands"];
+module.exports = ["entities", "commands"];

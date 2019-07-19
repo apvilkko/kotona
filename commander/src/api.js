@@ -218,6 +218,7 @@ const startServer = () => {
   router.post("/commands/:id/run", async (req, res) => {
     const command = db.getEntity(COMMANDS, req.params.id);
     console.log("run", command);
+    // TODO remove hardcode
     const intKey = "lights/tradfri";
     const { entity: entityId, parameter, value } = command;
     try {

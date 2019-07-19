@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Loading from "./components/Loading";
 import Button from "./components/Button";
-import LabeledInput from "./components/LabeledInput";
 import useFetch from "./hooks/useFetch";
+import CommandEditor from "./CommandEditor";
 
 const CommandsContainer = ({ render, reload }) => {
   const { data, isLoading, error, doFetch } = useFetch();
@@ -43,51 +43,6 @@ const CommandsList = ({ data, setEditing, remove, runCommand }) =>
       </ul>
     </div>
   ) : null;
-
-const fields = [
-  { label: "Name", id: "name" },
-  { label: "Entity", id: "entity" },
-  { label: "Parameter", id: "parameter" },
-  { label: "Value", id: "value" }
-];
-
-const CommandEditor = ({ currentData, onExit }) => {
-  const [formData, setFormData] = useState(null);
-
-  useEffect(() => {
-    setFormData(currentData);
-  }, [currentData]);
-
-  const handleChange = id => evt => {
-    setFormData({
-      ...formData,
-      [id]: evt.target.value
-    });
-  };
-
-  if (formData === null) return null;
-
-  const renderForm = fields =>
-    fields.map(field => (
-      <LabeledInput
-        key={field.id}
-        label={field.label}
-        id={field.id}
-        handleChange={handleChange}
-        value={formData ? formData[field.id] : ""}
-      />
-    ));
-
-  return (
-    <div>
-      <div>{renderForm(fields)}</div>
-      <div>
-        <Button onClick={() => onExit()}>Cancel</Button>
-        <Button onClick={() => onExit(formData)}>Save</Button>
-      </div>
-    </div>
-  );
-};
 
 const commandUrl = id => `/api/commands${id ? "/" + id : ""}`;
 
