@@ -9,6 +9,9 @@ export default ({ className, children, options }) => {
   useEffect(() => {
     hammer = new Hammer(el.current); // eslint-disable-line no-undef
     hammer.on("swipe", evt => {
+      if (evt.target.tagName === "INPUT") {
+        return;
+      }
       if (evt.deltaX < 0) {
         if (options.onSwipeLeft) {
           options.onSwipeLeft(evt);

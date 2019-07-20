@@ -165,6 +165,14 @@ const setEntityState = (entityId, parameter, value) => {
   return doRequest(`${config.coapClient} ${params}`);
 };
 
+const getEntityState = async (entity, parameter) => {
+  if (parameter === "state") {
+    return entity.on;
+  }
+  console.error(`getEntityState parameter ${parameter} not implemented!`);
+  return undefined;
+};
+
 const getProp = (obj, path) => {
   if (typeof path === "string") {
     const splitPath = path.split(".");
@@ -241,6 +249,7 @@ const isObservable = entity => {
 
 const api = {
   getEntities,
+  getEntityState,
   setEntityState,
   startObserving,
   transformEntity,

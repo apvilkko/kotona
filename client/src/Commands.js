@@ -30,21 +30,18 @@ const CommandListItem = ({ item, setEditing, remove, runCommand }) => (
 
 const CommandsList = ({ data, setEditing, remove, runCommand }) =>
   data ? (
-    <div>
-      <p>{JSON.stringify(data)}</p>
-      <ul>
-        {data.map(item => (
-          <li key={item.id}>
-            <CommandListItem
-              item={item}
-              setEditing={setEditing}
-              remove={remove}
-              runCommand={runCommand}
-            />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul>
+      {data.map(item => (
+        <li key={item.id}>
+          <CommandListItem
+            item={item}
+            setEditing={setEditing}
+            remove={remove}
+            runCommand={runCommand}
+          />
+        </li>
+      ))}
+    </ul>
   ) : null;
 
 const commandUrl = id => `/api/commands${id ? "/" + id : ""}`;

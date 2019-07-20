@@ -5,6 +5,7 @@ const kill = require("tree-kill");
 const dbFactory = require("./db");
 const integrationsFactory = require("./integrations/index");
 const isQuietHours = require("./isQuietHours");
+const actions = require("./actions");
 
 const PORTS = require("../../ports");
 const port = PORTS.commander;
@@ -237,13 +238,8 @@ const startServer = () => {
   });
 
   router.post("/commands/:id/run", async (req, res) => {
-    const command = db.getEntity(COMMANDS, req.params.id);
-    console.log("run", command);
-    // TODO remove hardcode
-    const intKey = "lights/tradfri";
-    const { entity: entityId, parameter, value } = command;
     try {
-      await integrations[intKey].setEntityState(entityId, parameter, value);
+      await actions.runCommand(req.params.id);
       res.sendStatus(200);
     } catch (e) {
       console.error(e);
@@ -304,6 +300,7 @@ dbFactory.initialize(dbInstance => {
       });
     });
     db = dbInstance;
+    actions.init(db, integrations);
     startServer();
   });
 });

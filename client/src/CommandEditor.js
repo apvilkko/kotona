@@ -113,24 +113,37 @@ const CommandEditor = ({ currentData, onExit, integrations }) => {
     });
   };
 
+  const remove = (arrayName, index) => () => {
+    const arr = (formData || {})[arrayName] || [];
+    setFormData({
+      ...formData,
+      [arrayName]: [...arr.slice(0, index), ...arr.slice(index + 1)]
+    });
+  };
+
   if (formData === null) return null;
 
   const renderForm = (fields, formData, prefix, index) => {
     const data = formData || {};
-    return fields.map(field => {
+    const fieldsPart = fields.map(field => {
       if (field.entities) {
         return (
           <div key={field.entities}>
             <Label htmlFor={field.label}>{t(field.label)}</Label>
             {(data[field.entities] || []).map((item, i) => {
-              return renderForm(
-                FORM_ENTITIES[field.entities],
-                item,
-                field.entities,
-                i
+              return (
+                <div key={i}>
+                  {renderForm(
+                    FORM_ENTITIES[field.entities],
+                    item,
+                    field.entities,
+                    i
+                  )}
+                  <Button onClick={remove(field.entities, i)}>{t("-")}</Button>
+                </div>
               );
             })}
-            <Button onClick={push(field.entities)}>{t("Add")}</Button>
+            <Button onClick={push(field.entities)}>{t("+")}</Button>
           </div>
         );
       }
@@ -203,6 +216,8 @@ const CommandEditor = ({ currentData, onExit, integrations }) => {
         />
       );
     });
+
+    return fieldsPart;
   };
 
   return (
