@@ -1,21 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Loading from "./components/Loading";
 import Button from "./components/Button";
 import useFetch from "./hooks/useFetch";
 import CommandEditor from "./CommandEditor";
+import CommandsContainer from "./CommandsContainer";
 import t from "./i18n";
-
-const CommandsContainer = ({ render, reload }) => {
-  const { data, isLoading, error, doFetch } = useFetch();
-
-  useEffect(() => {
-    doFetch("/api/commands");
-  }, [reload]);
-
-  if (error) return "" + error;
-  if (isLoading) return <Loading />;
-  return <div>{render(data)}</div>;
-};
 
 const CommandListItem = ({ item, setEditing, remove, runCommand }) => (
   <div>
