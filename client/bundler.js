@@ -3,7 +3,13 @@ const Path = require("path");
 const PORTS = require("../ports.json");
 
 // Single entrypoint file location:
-const entryFiles = Path.join(__dirname, "./src/index.html");
+const entryFiles = [
+  Path.join(__dirname, "./index.html")
+  /* Path.join(
+    __dirname,
+    "./node_modules/svelte-router-spa/src/components/*.svelte"
+  ) */
+];
 // OR: Multiple files with globbing (can also be .js)
 // const entryFiles = './src/*.js';
 // OR: Multiple files in an array
@@ -12,6 +18,7 @@ const entryFiles = Path.join(__dirname, "./src/index.html");
 // Bundler options
 const options = {
   publicUrl: "/ui",
+  outFile: "index.html",
   sourceMaps: false
 };
 
