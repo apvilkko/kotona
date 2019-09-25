@@ -1,0 +1,27 @@
+@import "./variables";
+
+@mixin thumb() {
+  border: none;
+  height: 1rem;
+  width: 0.5rem;
+  border-radius: 3px;
+  background: $color-accentLight;
+  cursor: pointer;
+}
+
+.range {
+  display: inline-block;
+  width: 100%;
+  & > input[type="range"] {
+    width: 98%;
+    border: none;
+    cursor: pointer;
+    height: 1rem;
+    &::-webkit-slider-thumb {
+      @include thumb();
+    }
+    &::-moz-range-thumb {
+      @include thumb();
+    }
+  }
+}

@@ -1,0 +1,75 @@
+@import "./variables";
+
+html {
+  font-size: $font-baseSize;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#app {
+  padding: $bodyPadding;
+}
+
+body {
+  font-family: $font-baseFamily;
+  background: $color-bg;
+  color: $color-text;
+}
+
+small {
+  font-size: 0.8rem;
+}
+
+.icon {
+  stroke: $color-accentLight;
+  fill: $color-accentLight;
+}
+
+.icon-sm {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  vertical-align: -40%;
+  margin: -0.3rem;
+}
+
+button {
+  color: $color-text;
+  font-size: $font-baseSize;
+  font-family: $font-baseFamily;
+}
+
+a {
+  color: $color-link;
+}
+
+input {
+  background: $color-bg;
+  color: $color-text;
+  font-size: inherit;
+}
+
+label + input {
+  margin-left: 0.5rem;
+}
+
+::-webkit-scrollbar {
+  height: 0.2rem;
+  width: 0.2rem;
+  background: $color-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $color-dark;
+  -webkit-border-radius: 0.15rem;
+  -webkit-box-shadow: none;
+}
+
+::-webkit-scrollbar-corner {
+  background: $color-bg;
+}

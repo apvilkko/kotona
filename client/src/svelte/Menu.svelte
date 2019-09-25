@@ -2,17 +2,32 @@
   import { navigateTo } from "svelte-router-spa";
   import pages from "./pages";
   import Link from "./Link.svelte";
+  import Button from "./components/Button.svelte";
   import t from "../i18n";
+
+  let container;
 
   $: isOpen = false;
 
-  const toggle = () => {
-    isOpen = !isOpen;
+  const toggle = state => {
+    isOpen = typeof state === "boolean" ? state : !isOpen;
+  };
+
+  const handleClick = event => {
+    if (container && !container.contains(event.target)) {
+      toggle(false);
+    }
+  };
+
+  const reload = () => {
+    window.location.reload(true);
   };
 </script>
 
-<div>
-  <button type="button" on:click={toggle}>☰</button>
+<svelte:window on:click={handleClick} />
+
+<div class="menu-container" bind:this={container}>
+  <Button variant="base" class="menu-opener" onClick={toggle}>☰</Button>
   {#if isOpen}
     <ul>
       {#each pages as page}
@@ -21,6 +36,7 @@
         </li>
       {/each}
     </ul>
+    <Button onClick={reload}>{t('Refresh')}</Button>
   {/if}
 
 </div>

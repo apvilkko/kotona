@@ -1,7 +1,10 @@
 import App from "./svelte/App.svelte";
 import { SpaRouter } from "svelte-router-spa";
 import routes from "./svelte/routes";
-import "./styles/reset.css";
+
+import "./styles/reset.scss";
+import "./styles/global.scss";
+import "./styles/style.scss";
 
 history.pushState = (f =>
   function pushState() {
