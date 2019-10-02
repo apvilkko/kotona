@@ -1,0 +1,15 @@
+@import "./variables";
+
+.modal {
+  position: absolute;
+  padding: 1em;
+  top: 2rem;
+  left: 2rem;
+  width: 14em;
+  height: 80vh;
+  background: $modal-bg;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 100;
+}

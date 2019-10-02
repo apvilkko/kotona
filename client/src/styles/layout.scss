@@ -1,0 +1,24 @@
+@import "./variables.scss";
+
+.spacer {
+  display: inline-block;
+  width: 0.5ch;
+  height: auto;
+}
+
+.spacer-vertical {
+  display: block;
+  height: 1ch;
+}
+
+.spacer-big {
+  width: 1.5rem;
+}
+
+.smaller {
+  color: inherit;
+}
+
+.smaller-dimmer {
+  color: $color-dimmer;
+}

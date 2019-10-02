@@ -26,16 +26,23 @@ small {
 }
 
 .icon {
+  // display: inline-flex;
   stroke: $color-accentLight;
   fill: $color-accentLight;
+  & > svg {
+    width: 100px;
+    height: 100px;
+    margin: -11px;
+  }
 }
 
 .icon-sm {
-  width: 2rem;
-  height: 2rem;
-  display: inline-flex;
-  vertical-align: -40%;
-  margin: -0.3rem;
+  vertical-align: -20%;
+  /* margin: -0.3rem; */
+  & > svg {
+    width: 2rem;
+    height: 2rem;
+  }
 }
 
 button {

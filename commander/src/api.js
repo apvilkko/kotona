@@ -181,6 +181,7 @@ const startServer = () => {
     const integration = integrations[intKey];
     if (!integration || integration.config.readOnly === false) {
       res.sendStatus(METHOD_NOT_ALLOWED);
+      return;
     }
     await stopListening(intKey, dbEntity.id, true);
     if (req.body.id) {

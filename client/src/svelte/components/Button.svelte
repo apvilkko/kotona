@@ -7,6 +7,7 @@
   class={`button ${$$props.class}`}
   class:action-button={variant === 'action'}
   type="button"
-  on:click={onClick}>
+  on:click={onClick}
+  style={$$props.style}>
   <slot />
 </button>

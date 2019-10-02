@@ -66,3 +66,20 @@
     background: inherit;
   }
 }
+
+.color-select {
+  display: flex;
+  flex-wrap: wrap;
+  & > * {
+    margin-right: 0.2em;
+    margin-bottom: 0.2em;
+  }
+}
+
+.color {
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 1.25rem;
+  display: inline-block;
+  border-color: transparent;
+}
