@@ -76,7 +76,7 @@ const syncEntities = (intKey, entities, autoClean) => {
   let ret = db.getCollection(collection).find({ integration: intKey });
   if (autoClean) {
     db.getCollection(collection).removeWhere(
-      x => !validEntities.includes(x.name)
+      x => x.integration === intKey && !validEntities.includes(x.name)
     );
     console.log("Autocleaned.");
     ret = db.getCollection(collection).find({ integration: intKey });
