@@ -24,10 +24,6 @@
   }
 
   transition: border-color 0.2s linear;
-
-  &.primary {
-    border-color: $color-accentLight;
-  }
 }
 
 .button-command {
@@ -37,4 +33,8 @@
 
 .button-closer {
   border: none;
+}
+
+.button-primary {
+  border-color: $color-accentLight;
 }

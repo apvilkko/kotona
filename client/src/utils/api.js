@@ -39,9 +39,20 @@ const websocket = ({ onData }) => {
 };
 
 const apiMethod = ({ method, url, data }) =>
-  fetch(url, { method, body: JSON.stringify(data) }).then(resp => resp.json());
+  fetch(url, {
+    method,
+    body: JSON.stringify(data),
+    headers: { "Content-Type": "application/json" }
+  }).then(resp => {
+    if (method !== "DELETE") {
+      return resp.json();
+    }
+    return resp;
+  });
 
 const apiGet = url => apiMethod({ method: "GET", url });
 const apiPost = (url, data) => apiMethod({ method: "POST", url, data });
+const apiPut = (url, data) => apiMethod({ method: "PUT", url, data });
+const apiDelete = url => apiMethod({ method: "DELETE", url });
 
-export { apiGet, apiPost, websocket };
+export { apiGet, apiPost, apiPut, apiDelete, websocket };
