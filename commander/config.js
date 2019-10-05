@@ -8,14 +8,14 @@ module.exports = () => ({
   integrations: [
     {
       plugin: "lights/tradfri",
-      enabled: true,
-      dummy: true,
-      dummyDb: true
+      enabled: true
+      //dummy: true,
+      //dummyDb: true
     },
     {
       plugin: "weather/ruuvitag",
       enabled: true,
-      dummy: true,
+      //dummy: true,
       polling: {
         all: true,
         default: 5 * 60 * 1000,
@@ -25,7 +25,7 @@ module.exports = () => ({
     {
       plugin: "weather/darksky",
       enabled: true,
-      dummy: true,
+      //dummy: true,
       readOnly: true,
       polling: {
         default: 10 * 60 * 1000,
