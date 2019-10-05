@@ -46,30 +46,42 @@ const updateEntityData = (id, entity) => {
   return null;
 };
 
-const syncEntities = (intKey, entities) => {
+const syncEntities = (intKey, entities, autoClean) => {
   const collection = "entities";
+  const validEntities = [];
   entities.forEach(entity => {
     const existing = db
       .getCollection(collection)
       .findOne({ entityId: entity.entityId, integration: intKey });
+    let toBeSaved = null;
     if (existing) {
       console.log("found existing", entity.entityId, intKey);
-      saveEntity(collection, {
+      toBeSaved = {
         ...existing,
         name: entity.name,
         data: entity.data
-      });
+      };
     } else {
       console.log("saving new", entity.entityId, intKey);
-      saveEntity(collection, {
+      toBeSaved = {
         ...entity,
         type: "entity",
         integration: intKey
-      });
+      };
     }
+    validEntities.push(toBeSaved.name);
+    saveEntity(collection, toBeSaved);
   });
   console.log(`Synced ${entities.length} entities.`);
-  return db.getCollection(collection).find({ integration: intKey });
+  let ret = db.getCollection(collection).find({ integration: intKey });
+  if (autoClean) {
+    db.getCollection(collection).removeWhere(
+      x => !validEntities.includes(x.name)
+    );
+    console.log("Autocleaned.");
+    ret = db.getCollection(collection).find({ integration: intKey });
+  }
+  return ret;
 };
 
 const api = {

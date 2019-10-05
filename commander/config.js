@@ -16,6 +16,7 @@ module.exports = () => ({
       plugin: "weather/ruuvitag",
       enabled: true,
       //dummy: true,
+      autoClean: true,
       polling: {
         all: true,
         default: 5 * 60 * 1000,

@@ -278,7 +278,11 @@ const doSync = (intKey, dbInstance, cb) => {
   const getter = useDummy ? dummyGetter : integration.getEntities;
   getter()
     .then(entities => {
-      savedEntities = dbInstance.syncEntities(intKey, entities);
+      savedEntities = dbInstance.syncEntities(
+        intKey,
+        entities,
+        integration.config.autoClean
+      );
       cb(savedEntities);
     })
     .catch(e => {
