@@ -34,7 +34,7 @@
 
 <div>
   {#if type === 'radio'}
-    <fieldset>
+    <fieldset class="form-group">
       <legend>{t(field.label)}</legend>
       {#each field.options as opt}
         <span>
@@ -50,7 +50,7 @@
       {/each}
     </fieldset>
   {:else if field.id === 'intKey'}
-    <div>
+    <div class="form-group">
       <Label for={id}>{t(field.label)}</Label>
       <select {id} on:change={handleChange(id)} value={getter(data, field.id)}>
         <option value="">Choose</option>
@@ -65,7 +65,7 @@
       </select>
     </div>
   {:else if field.id === 'entKey'}
-    <div>
+    <div class="form-group">
       <Label for={id}>{t(field.label)}</Label>
       <select {id} on:change={handleChange(id)} value={getter(data, field.id)}>
         <option value="">Choose</option>

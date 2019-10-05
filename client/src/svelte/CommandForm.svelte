@@ -2,6 +2,9 @@
   import FormField from "./components/FormField.svelte";
   import Label from "./components/Label.svelte";
   import Button from "./components/Button.svelte";
+  import Spacer from "./components/Spacer.svelte";
+  import BoxColumn from "./components/BoxColumn.svelte";
+  import BoxRow from "./components/BoxRow.svelte";
   import t from "../i18n";
 
   export let fields;
@@ -21,23 +24,30 @@
   {#each fields as field}
     {#if field.entities}
       <div>
-        <Label for={field.label}>{t(field.label)}</Label>
+        <Label class="command-form-label" for={field.label}>
+          {t(field.label)}
+        </Label>
         {#each data[field.entities] || [] as item, i}
-          <div>
-            <svelte:self
-              fields={formEntities[field.entities]}
-              data={item}
-              prefix={field.entities}
-              index={i}
-              {integrations}
-              {handleChange}
-              {formEntities}
-              {entityOptions}
-              {fetchEntKeys}
-              {remove}
-              {push} />
-            <Button onClick={remove(field.entities, i)}>{t('-')}</Button>
-          </div>
+          <BoxRow>
+            <BoxColumn>
+              <svelte:self
+                fields={formEntities[field.entities]}
+                data={item}
+                prefix={field.entities}
+                index={i}
+                {integrations}
+                {handleChange}
+                {formEntities}
+                {entityOptions}
+                {fetchEntKeys}
+                {remove}
+                {push} />
+              <Spacer vertical={true} />
+            </BoxColumn>
+            <BoxColumn>
+              <Button onClick={remove(field.entities, i)}>{t('-')}</Button>
+            </BoxColumn>
+          </BoxRow>
         {/each}
         <Button onClick={push(field.entities)}>{t('+')}</Button>
       </div>

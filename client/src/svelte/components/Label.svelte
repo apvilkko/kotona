@@ -1,3 +1,3 @@
-<label for={$$props.for}>
+<label for={$$props.for} class={$$props.class}>
   <slot />
 </label>

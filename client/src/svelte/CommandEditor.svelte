@@ -1,5 +1,6 @@
 <script>
   import Button from "./components/Button.svelte";
+  import Spacer from "./components/Spacer.svelte";
   import Label from "./components/Label.svelte";
   import t from "../i18n";
   import CommandForm from "./CommandForm.svelte";
@@ -24,16 +25,28 @@
           { label: "Switch", value: "switch" }
         ]
       },
-      { label: "Actions", entities: "actions" }
-      // { label: "Triggers", entities: "triggers" }
+      { label: "Actions", entities: "actions" },
+      { label: "Triggers", entities: "triggers" }
     ],
     actions: [
       { label: "Integration", id: "intKey" },
       { label: "Entity", id: "entKey" },
       { label: "Parameter", id: "parameter" },
       { label: "Value", id: "value" }
+    ],
+    triggers: [
+      {
+        label: "Type",
+        id: "type",
+        type: "radio",
+        options: [{ label: "After", value: "after" }]
+      },
+      { label: "Seconds", id: "seconds" },
+      { label: "Integration", id: "intKey" },
+      { label: "Entity", id: "entKey" },
+      { label: "Parameter", id: "parameter" },
+      { label: "Value", id: "value" }
     ]
-    // triggers: []
   };
 
   const fields = FORM_ENTITIES.commands;
@@ -106,6 +119,7 @@
       {fetchEntKeys} />
   </div>
   <div>
+    <Spacer vertical={true} />
     <Button onClick={() => onExit()}>{t('Cancel')}</Button>
     <Button variant="primary" onClick={() => onExit(formData)}>
       {t('Save')}

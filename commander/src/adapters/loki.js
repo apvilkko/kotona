@@ -16,13 +16,18 @@ const getEntity = (collection, id) => {
 };
 
 const saveEntity = (collection, entity, insert = false) => {
+  let ent = entity;
+  ent.lastModified = { ...ent.lastModified, on: new Date().getTime() };
   if (insert) {
-    return db.getCollection(collection).insert(entity);
+    return db.getCollection(collection).insert(ent);
+  } else if (entity.id) {
+    const existing = getEntity(collection, entity.id);
+    if (existing.lastModified && existing.on === ent.on) {
+      ent.lastModified.on = existing.lastModified.on;
+    }
+    return db.getCollection(collection).update(ent);
   }
-  if (entity.id) {
-    return db.getCollection(collection).update(entity);
-  }
-  return db.getCollection(collection).insert({ ...entity, id: uuidv4() });
+  return db.getCollection(collection).insert({ ...ent, id: uuidv4() });
 };
 
 const deleteEntity = (collection, id) => {

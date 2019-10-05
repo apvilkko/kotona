@@ -1,5 +1,6 @@
 <script>
   import Button from "./components/Button.svelte";
+  import Spacer from "./components/Spacer.svelte";
   import { apiGet, apiPost, apiDelete, apiPut } from "../utils/api";
   import t from "../i18n";
   import CommandsList from "./CommandsList.svelte";
@@ -64,8 +65,7 @@
       {setEditing}
       remove={handleRemove}
       {runCommand} />
-    <div>
-      <Button onClick={() => setEditing('new')}>{t('Add command')}</Button>
-    </div>
+    <Spacer vertical={true} />
+    <Button onClick={() => setEditing('new')}>{t('Add command')}</Button>
   {/if}
 </div>

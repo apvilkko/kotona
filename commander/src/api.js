@@ -12,6 +12,9 @@ const port = PORTS.commander;
 
 const METHOD_NOT_ALLOWED = 405;
 
+const TRIGGER_INTERVAL = 60000;
+// const TRIGGER_INTERVAL = 5000;
+
 const COMMANDS = "commands";
 const ENTITIES = "entities";
 let integrations = {};
@@ -28,6 +31,44 @@ const onDataCreator = dbInstance => entity => data => {
     console.log("update", entity.entityId);
     socket.ws.send(JSON.stringify(updated));
   }
+};
+
+const toBool = x => x === "on" || x === 1 || x === true || x === "true";
+
+const startTriggerMonitor = () => {
+  console.log("start trigger monitor");
+  setInterval(() => {
+    const commands = db.getCollection(COMMANDS);
+    commands.forEach(command => {
+      if (command.triggers && command.triggers.length) {
+        command.triggers.forEach(trigger => {
+          if (trigger.type === "after") {
+            const entity = db.getEntity(ENTITIES, trigger.entKey);
+            console.log("after", trigger, entity);
+            const now = new Date().getTime();
+            const triggerDelta = Number(trigger.seconds) * 1000;
+            if (trigger.parameter === "state") {
+              const matchesState = toBool(trigger.value) === entity.on;
+              const isPastTrigger =
+                entity.lastModified &&
+                entity.lastModified.on &&
+                now > entity.lastModified.on + triggerDelta;
+              if (matchesState && isPastTrigger) {
+                console.log(
+                  "triggering",
+                  trigger.intKey,
+                  trigger.entKey,
+                  trigger.parameter,
+                  trigger.value
+                );
+                actions.runCommand(command.id);
+              }
+            }
+          }
+        });
+      }
+    });
+  }, TRIGGER_INTERVAL);
 };
 
 // TODO refactor to integration
@@ -306,6 +347,9 @@ dbFactory.initialize(dbInstance => {
     });
     db = dbInstance;
     actions.init(db, integrations);
+    setTimeout(() => {
+      startTriggerMonitor();
+    }, 5000);
     startServer();
   });
 });
