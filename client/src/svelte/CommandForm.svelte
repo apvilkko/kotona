@@ -13,6 +13,8 @@
   export let push;
   export let handleChange;
   export let integrations;
+  export let entityOptions;
+  export let fetchEntKeys;
 </script>
 
 <div>
@@ -30,6 +32,8 @@
               {integrations}
               {handleChange}
               {formEntities}
+              {entityOptions}
+              {fetchEntKeys}
               {remove}
               {push} />
             <Button onClick={remove(field.entities, i)}>{t('-')}</Button>
@@ -45,7 +49,9 @@
         {field}
         {data}
         {handleChange}
-        {integrations} />
+        {integrations}
+        {entityOptions}
+        {fetchEntKeys} />
     {/if}
   {/each}
 </div>

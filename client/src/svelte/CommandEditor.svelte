@@ -3,6 +3,7 @@
   import Label from "./components/Label.svelte";
   import t from "../i18n";
   import CommandForm from "./CommandForm.svelte";
+  import { apiGet } from "../utils/api";
 
   export let onExit;
   export let currentData;
@@ -75,6 +76,20 @@
       };
     }
   };
+
+  $: entityOptions = {};
+
+  const fetchEntKeys = entKeys => {
+    entKeys.forEach(entKey => {
+      if (!entityOptions[entKey]) {
+        apiGet(`/api/integrations/${encodeURIComponent(entKey)}/entities`).then(
+          x => {
+            entityOptions[entKey] = x;
+          }
+        );
+      }
+    });
+  };
 </script>
 
 <div>
@@ -86,7 +101,9 @@
       {push}
       {remove}
       {handleChange}
-      {integrations} />
+      {integrations}
+      {entityOptions}
+      {fetchEntKeys} />
   </div>
   <div>
     <Button onClick={() => onExit()}>{t('Cancel')}</Button>

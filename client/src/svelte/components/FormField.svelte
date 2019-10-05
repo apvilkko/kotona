@@ -2,7 +2,6 @@
   import Label from "./Label.svelte";
   import LabeledInput from "./LabeledInput.svelte";
   import t from "../../i18n";
-  import { apiGet } from "../../utils/api";
 
   export let type;
   export let prefix;
@@ -12,27 +11,25 @@
   export let field;
   export let data;
   export let handleChange;
+  export let fetchEntKeys;
 
   $: id = prefix
     ? `${prefix}__${index}__${field.id || field.label}`
     : field.id || field.label;
-  $: entityOptions = {};
-
-  $: {
-    const entKey = data.intKey;
-    if (field.id === "entKey" && entKey && !entityOptions[entKey]) {
-      apiGet(`/api/integrations/${encodeURIComponent(entKey)}/entities`).then(
-        x => {
-          entityOptions[entKey] = x;
-        }
-      );
-    }
-  }
 
   const getter = (data, id, prefix, index) => {
     // TODO support prefix & index
     return data[id];
   };
+
+  $: {
+    if (field.id === "entKey") {
+      const entKey = data.intKey;
+      if (entKey) {
+        fetchEntKeys([entKey]);
+      }
+    }
+  }
 </script>
 
 <div>
