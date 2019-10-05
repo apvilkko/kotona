@@ -44,7 +44,6 @@ const startTriggerMonitor = () => {
         command.triggers.forEach(trigger => {
           if (trigger.type === "after") {
             const entity = db.getEntity(ENTITIES, trigger.entKey);
-            console.log("after", trigger, entity);
             const now = new Date().getTime();
             const triggerDelta = Number(trigger.seconds) * 1000;
             if (trigger.parameter === "state") {
