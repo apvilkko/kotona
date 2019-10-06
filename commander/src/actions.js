@@ -1,3 +1,5 @@
+const triggers = require("./triggers");
+
 const COMMANDS = "commands";
 const ENTITIES = "entities";
 
@@ -48,6 +50,9 @@ const runCommand = async commandId => {
         console.log(`setting ${entKey}/${entityId} "${parameter}" to ${value}`);
         await integrations[intKey].setEntityState(entityId, parameter, value);
       }
+      setTimeout(() => {
+        triggers.checkTriggers();
+      }, 100);
     }
   }
 };

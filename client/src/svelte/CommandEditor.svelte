@@ -39,13 +39,17 @@
         label: "Type",
         id: "type",
         type: "radio",
-        options: [{ label: "After", value: "after" }]
+        options: [
+          { label: "After", value: "after" },
+          { label: "After inactivity", value: "inactivity" }
+        ]
       },
-      { label: "Seconds", id: "seconds" },
+      { label: "Duration", id: "duration" },
       { label: "Integration", id: "intKey" },
       { label: "Entity", id: "entKey" },
       { label: "Parameter", id: "parameter" },
-      { label: "Value", id: "value" }
+      { label: "Value", id: "value" },
+      { label: "Operator", id: "operator" }
     ]
   };
 

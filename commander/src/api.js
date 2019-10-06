@@ -6,14 +6,12 @@ const dbFactory = require("./db");
 const integrationsFactory = require("./integrations/index");
 const isQuietHours = require("./isQuietHours");
 const actions = require("./actions");
+const triggers = require("./triggers");
 
 const PORTS = require("../../ports");
 const port = PORTS.commander;
 
 const METHOD_NOT_ALLOWED = 405;
-
-const TRIGGER_INTERVAL = 60000;
-// const TRIGGER_INTERVAL = 5000;
 
 const COMMANDS = "commands";
 const ENTITIES = "entities";
@@ -31,43 +29,6 @@ const onDataCreator = dbInstance => entity => data => {
     console.log("update", entity.entityId);
     socket.ws.send(JSON.stringify(updated));
   }
-};
-
-const toBool = x => x === "on" || x === 1 || x === true || x === "true";
-
-const startTriggerMonitor = () => {
-  console.log("start trigger monitor");
-  setInterval(() => {
-    const commands = db.getCollection(COMMANDS);
-    commands.forEach(command => {
-      if (command.triggers && command.triggers.length) {
-        command.triggers.forEach(trigger => {
-          if (trigger.type === "after") {
-            const entity = db.getEntity(ENTITIES, trigger.entKey);
-            const now = new Date().getTime();
-            const triggerDelta = Number(trigger.seconds) * 1000;
-            if (trigger.parameter === "state") {
-              const matchesState = toBool(trigger.value) === entity.on;
-              const isPastTrigger =
-                entity.lastModified &&
-                entity.lastModified.on &&
-                now > entity.lastModified.on + triggerDelta;
-              if (matchesState && isPastTrigger) {
-                console.log(
-                  "triggering",
-                  trigger.intKey,
-                  trigger.entKey,
-                  trigger.parameter,
-                  trigger.value
-                );
-                actions.runCommand(command.id);
-              }
-            }
-          }
-        });
-      }
-    });
-  }, TRIGGER_INTERVAL);
 };
 
 // TODO refactor to integration
@@ -235,6 +196,9 @@ const startServer = () => {
         key,
         value
       );
+      setTimeout(() => {
+        triggers.checkTriggers();
+      }, 100);
       // console.log("setEntityState result", result);
       res.sendStatus(200);
     } catch (e) {
@@ -346,8 +310,9 @@ dbFactory.initialize(dbInstance => {
     });
     db = dbInstance;
     actions.init(db, integrations);
+    triggers.init(db, actions);
     setTimeout(() => {
-      startTriggerMonitor();
+      triggers.startTriggerMonitor();
     }, 5000);
     startServer();
   });
