@@ -8,8 +8,9 @@ const init = (dbRef, actionsRef) => {
   actions = actionsRef;
 };
 
-//const TRIGGER_INTERVAL = 60000;
-const TRIGGER_INTERVAL = 5000;
+const TRIGGER_INTERVAL = 60000;
+//const TRIGGER_INTERVAL = 5000;
+const UPPER_LIMIT = TRIGGER_INTERVAL * 1.5;
 
 const COMMANDS = "commands";
 const ENTITIES = "entities";
@@ -31,8 +32,11 @@ const getLastModified = intKey => {
   return latest;
 };
 
+const bookKeeping = {};
+
 const checkTriggers = () => {
   const commands = db.getCollection(COMMANDS);
+  const now = new Date().getTime();
   commands.forEach(command => {
     if (command.triggers && command.triggers.length > 0) {
       const results = [[], []];
@@ -47,17 +51,16 @@ const checkTriggers = () => {
           continue;
         }
 
-        const now = new Date().getTime();
-
         if (trigger.type === "after") {
           const entity = db.getEntity(ENTITIES, trigger.entKey);
           if (trigger.parameter === "state") {
             const matchesState = toBool(trigger.value) === entity.on;
-            const isPastTrigger =
+            const inInTriggerRange =
               entity.lastModified &&
               entity.lastModified.on &&
-              now > entity.lastModified.on + triggerDelta;
-            const shouldTrigger = matchesState && isPastTrigger;
+              now > entity.lastModified.on + triggerDelta &&
+              now <= entity.lastModified.on + triggerDelta + UPPER_LIMIT;
+            const shouldTrigger = matchesState && inInTriggerRange;
             results[shouldTrigger ? 0 : 1].push(trigger);
           }
         } else if (trigger.type === "inactivity") {
@@ -75,8 +78,19 @@ const checkTriggers = () => {
         (command.triggers[0].operator || "").toUpperCase() || "OR";
       const shouldRun =
         results[0].length > 0 && (operator === "OR" || results[1].length === 0);
-      if (shouldRun) {
-        console.log("trigger fired for", command.id, operator);
+      const commandNotRunRecently =
+        now > (bookKeeping[command.id] || 0) + TRIGGER_INTERVAL;
+      console.log(
+        "trigger results: true",
+        results[0].length,
+        "false",
+        results[1].length,
+        operator,
+        commandNotRunRecently
+      );
+      if (shouldRun && commandNotRunRecently) {
+        console.log("trigger fired for", command.id);
+        bookKeeping[command.id] = new Date().getTime();
         actions.runCommand(command.id);
       }
     }
