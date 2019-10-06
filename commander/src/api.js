@@ -23,6 +23,9 @@ const socket = {};
 const onDataCreator = dbInstance => entity => data => {
   // console.log("update", entity.id, entity.entityId, data);
   const updated = dbInstance.updateEntityData(entity.id, data);
+  setTimeout(() => {
+    triggers.checkTriggers();
+  }, 100);
   if (socket.ws && socket.ws.readyState !== 1) {
     console.log("update: ws not ready");
   } else if (socket.ws && updated) {
