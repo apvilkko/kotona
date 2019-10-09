@@ -98,16 +98,6 @@ const checkTriggers = fromPolling => {
             continue;
           }
           const shouldTrigger = now > lastModified + triggerDelta;
-          console.log(
-            "inact",
-            shouldTrigger,
-            now,
-            lastModified,
-            triggerDelta,
-            new Date(now),
-            new Date(lastModified + triggerDelta),
-            lastModifiedCache
-          );
           results[shouldTrigger ? 0 : 1].push(trigger);
         }
       }
