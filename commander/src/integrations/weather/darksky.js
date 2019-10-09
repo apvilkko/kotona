@@ -55,9 +55,7 @@ const api = { getEntities, isObservable, pollingUpdate };
 const initialize = (conf, done) => {
   config = conf;
   const query = "?units=si&exclude=flags,alerts";
-  url = `https://api.darksky.net/forecast/${config.apiKey}/${config.latitude},${
-    config.longitude
-  }${query}`;
+  url = `https://api.darksky.net/forecast/${config.apiKey}/${config.latitude},${config.longitude}${query}`;
   done(api);
 };
 
