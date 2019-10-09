@@ -314,8 +314,9 @@ dbFactory.initialize(dbInstance => {
     db = dbInstance;
     actions.init(db, integrations);
     triggers.init(db, actions);
+    const startTime = new Date().getTime();
     setTimeout(() => {
-      triggers.startTriggerMonitor();
+      triggers.startTriggerMonitor(startTime);
     }, 5000);
     startServer();
   });

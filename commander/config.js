@@ -5,6 +5,10 @@ module.exports = () => ({
     adapter: "loki",
     path: "./data"
   },
+  polling: {
+    default: 1 * 60 * 1000,
+    quiet: 5 * 60 * 1000
+  },
   integrations: [
     {
       plugin: "lights/tradfri",

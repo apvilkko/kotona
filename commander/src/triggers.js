@@ -1,16 +1,19 @@
+const createConfig = require("../config");
 const toSeconds = require("./toSeconds");
+const isQuietHours = require("./isQuietHours");
 
+const config = createConfig();
 let db;
 let actions;
+let startTime;
 
 const init = (dbRef, actionsRef) => {
   db = dbRef;
   actions = actionsRef;
 };
 
-const TRIGGER_INTERVAL = 60000;
-//const TRIGGER_INTERVAL = 5000;
-const UPPER_LIMIT = TRIGGER_INTERVAL * 1.5;
+// Don't run triggers during app start
+const STARTUP_TRIGGER_SAFEGUARD = 1 * 60 * 1000;
 
 const COMMANDS = "commands";
 const ENTITIES = "entities";
@@ -34,14 +37,40 @@ const getLastModified = intKey => {
 
 const bookKeeping = {};
 
-const checkTriggers = () => {
-  const commands = db.getCollection(COMMANDS);
+const getInterval = upperLimit =>
+  (upperLimit ? 1.5 : 1) * config.polling[isQuietHours() ? "quiet" : "default"];
+
+const lastModifiedCache = {};
+
+const updateAndGetLastModified = (fromPolling, intKey) => {
   const now = new Date().getTime();
+  let value = now;
+  if (intKey) {
+    if (fromPolling) {
+      value = getLastModified(intKey);
+      lastModifiedCache[intKey] = value;
+    } else {
+      value = lastModifiedCache[intKey] || now;
+    }
+  }
+  return value;
+};
+
+const checkTriggers = fromPolling => {
+  const now = new Date().getTime();
+  if ((startTime || now) + STARTUP_TRIGGER_SAFEGUARD > now) {
+    return;
+  }
+  const commands = db.getCollection(COMMANDS);
   commands.forEach(command => {
     if (command.triggers && command.triggers.length > 0) {
       const results = [[], []];
       for (let i = 0; i < command.triggers.length; ++i) {
         const trigger = command.triggers[i];
+        const lastModified = updateAndGetLastModified(
+          fromPolling,
+          trigger.intKey
+        );
         const triggerDelta = toSeconds(trigger.duration) * 1000;
 
         const needsDuration =
@@ -59,7 +88,7 @@ const checkTriggers = () => {
               entity.lastModified &&
               entity.lastModified.on &&
               now > entity.lastModified.on + triggerDelta &&
-              now <= entity.lastModified.on + triggerDelta + UPPER_LIMIT;
+              now <= entity.lastModified.on + triggerDelta + getInterval(true);
             const shouldTrigger = matchesState && inInTriggerRange;
             results[shouldTrigger ? 0 : 1].push(trigger);
           }
@@ -68,7 +97,6 @@ const checkTriggers = () => {
             console.log("Missing intKey from inactivity trigger");
             continue;
           }
-          const lastModified = getLastModified(trigger.intKey);
           const shouldTrigger = now > lastModified + triggerDelta;
           results[shouldTrigger ? 0 : 1].push(trigger);
         }
@@ -79,7 +107,7 @@ const checkTriggers = () => {
       const shouldRun =
         results[0].length > 0 && (operator === "OR" || results[1].length === 0);
       const commandNotRunRecently =
-        now > (bookKeeping[command.id] || 0) + TRIGGER_INTERVAL;
+        now > (bookKeeping[command.id] || 0) + getInterval();
       console.log(
         "trigger results: true",
         results[0].length,
@@ -97,11 +125,18 @@ const checkTriggers = () => {
   });
 };
 
-const startTriggerMonitor = () => {
+const startTriggerMonitor = appStartTime => {
   console.log("start trigger monitor");
-  setInterval(() => {
-    checkTriggers();
-  }, TRIGGER_INTERVAL);
+  startTime = appStartTime;
+
+  function doCheck() {
+    checkTriggers(true);
+    setTimeout(() => {
+      doCheck();
+    }, getInterval());
+  }
+
+  doCheck();
 };
 
 module.exports = {
