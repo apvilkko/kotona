@@ -20,9 +20,9 @@ let db = null;
 const observed = {};
 const socket = {};
 
-const onDataCreator = dbInstance => entity => data => {
+const onDataCreator = (dbInstance, diffFn) => entity => data => {
   // console.log("update", entity.id, entity.entityId, data);
-  const updated = dbInstance.updateEntityData(entity.id, data);
+  const updated = dbInstance.updateEntityData(entity.id, data, diffFn);
   setTimeout(() => {
     triggers.checkTriggers();
   }, 100);
@@ -41,7 +41,7 @@ const startListeningEntity = (intKey, dbInstance, entity) => {
     console.log("Dummy, skip listening");
     return;
   }
-  const onData = onDataCreator(dbInstance)(entity);
+  const onData = onDataCreator(dbInstance, integration.isDifferent)(entity);
   const onClose = code => {
     let delay = 1000 + Math.round(Math.random() * 5000);
     if (

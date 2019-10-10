@@ -36,7 +36,7 @@ const deleteEntity = (collection, id) => {
   }
 };
 
-const updateEntityData = (id, entity) => {
+const updateEntityData = (id, entity, diffFn) => {
   const collection = "entities";
   // console.log("update", entity);
   const existing = db.getCollection(collection).findOne({ id });
@@ -45,8 +45,13 @@ const updateEntityData = (id, entity) => {
       ...existing,
       ...entity
     };
-    saveEntity(collection, newData);
-    return newData;
+    const isDataDifferent = !diffFn || diffFn(existing, newData);
+    if (isDataDifferent) {
+      saveEntity(collection, newData);
+      return newData;
+    }
+    console.log("not updating since not different", id, entity.id);
+    return null;
   }
   return null;
 };
