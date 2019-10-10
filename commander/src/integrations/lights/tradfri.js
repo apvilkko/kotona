@@ -12,7 +12,8 @@ const {
   ATTR_SWITCH_PLUG,
   ATTR_LIGHT_CONTROL,
   LIGHT_CONTROL,
-  PROPS
+  PROPS,
+  DEVICES
 } = constants;
 
 const getState = (entity, model, prop) => {
