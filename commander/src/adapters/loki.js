@@ -50,7 +50,6 @@ const updateEntityData = (id, entity, diffFn) => {
       saveEntity(collection, newData);
       return newData;
     }
-    console.log("not updating since not different", id, entity.id);
     return null;
   }
   return null;
