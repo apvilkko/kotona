@@ -75,7 +75,7 @@ const readBluetooth = devices =>
           p.address.toUpperCase()
         ].data = p.advertisement.manufacturerData
           .toString("hex")
-          .replace(/^(\d{0,4})(03)/, "$2");
+          .replace(/^(\d{0,4})(03|05)/, "$2");
       }
     });
   });
