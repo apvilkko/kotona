@@ -2,6 +2,7 @@
   import BoxRow from "../../components/BoxRow.svelte";
   import Smaller from "../../components/Smaller.svelte";
   import Spacer from "../../components/Spacer.svelte";
+  import { getTemperature, getHumidity } from "./ruuvitag.js";
 
   export let item;
   let data;
@@ -17,22 +18,6 @@
       data = hex.map(Number);
     }
   }
-
-  const getTemperature = data => {
-    if (data[0] === 3) {
-      const sign = data[2] > 127 ? -1 : 1;
-      const value = sign === -1 ? data[2] - 128 : data[2];
-      return sign * value + data[3] / 100;
-    }
-    return -1;
-  };
-
-  const getHumidity = data => {
-    if (data[0] === 3) {
-      return data[1] / 2;
-    }
-    return -1;
-  };
 </script>
 
 {#if item}

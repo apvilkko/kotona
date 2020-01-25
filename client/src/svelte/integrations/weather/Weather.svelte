@@ -3,10 +3,10 @@
   import Spacer from "../../components/Spacer.svelte";
   import Smaller from "../../components/Smaller.svelte";
   import { apiGet, websocket } from "../../../utils/api";
-  import Currently from "./Currently";
-  import Daily from "./Daily";
-  import RuuviTag from "./RuuviTag";
-  import WeatherChart from "./WeatherChart";
+  import Currently from "./Currently.svelte";
+  import Daily from "./Daily.svelte";
+  import RuuviTag from "./RuuviTag.svelte";
+  import WeatherChart from "./WeatherChart.svelte";
 
   const integration = "weather/darksky";
 
