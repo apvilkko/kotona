@@ -94,7 +94,7 @@ const pollingUpdate = (entity, onData) => {
   console.log("pollingUpdate");
   getEntities().then(entities => {
     entities.forEach(entity => {
-      if (entity) {
+      if (entity && onData[entity.entityId]) {
         onData[entity.entityId](entity);
       }
     });
