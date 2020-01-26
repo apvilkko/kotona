@@ -61,7 +61,7 @@ const readBluetooth = devices =>
         });
         console.log(`Read data from ${ret.length} ruuvitag devices.`);
         resolve(ret);
-      }, 5000);
+      }, config.scanTime);
     });
 
     noble.on("discover", p => {

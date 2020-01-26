@@ -21,6 +21,7 @@ module.exports = () => ({
       enabled: true,
       //dummy: true,
       autoClean: true,
+      scanTime: 6500,
       polling: {
         all: true,
         default: 5 * 60 * 1000,
