@@ -1,4 +1,4 @@
-const time = (time, timezone, omitClock, omitDate) => {
+const time = (time, timezone, omitClock, omitDate, withWeekday) => {
   const opts = {
     weekday: "short",
     month: "numeric",
@@ -12,6 +12,9 @@ const time = (time, timezone, omitClock, omitDate) => {
     delete opts.minute;
   }
   if (omitDate) {
+    if (!withWeekday) {
+      delete opts.weekday;
+    }
     delete opts.month;
     delete opts.day;
   }

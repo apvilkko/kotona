@@ -9,14 +9,20 @@
 
   $: {
     if (w && canvasEl) {
-      const datapoints = pathOr([], ["hourly", "data"])(w);
+      const datapoints = pathOr([], ["hourly"])(w);
       const labels = pipe(
-        map(prop("time")),
-        map(x => time(x, w.timezone, false, true))
+        map(prop("dt")),
+        map(x => time(x, w.timezone, false, true, true))
       )(datapoints);
 
-      const data = map(prop("temperature"))(datapoints);
-      const data2 = map(prop("precipIntensity"))(datapoints);
+      const data = map(prop("temp"))(datapoints);
+      const data2 = map(x => {
+        const value = x.rain || x.snow || 0;
+        if (typeof value !== "number") {
+          return Object.values(value)[0];
+        }
+        return value;
+      })(datapoints);
 
       const ctx = canvasEl.getContext("2d");
 
@@ -67,7 +73,7 @@
               },
               {
                 id: "precip",
-                display: false,
+                display: true,
                 barPercentage: 1.0,
                 categoryPercentage: 1.0
               }

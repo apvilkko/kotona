@@ -1,0 +1,510 @@
+{
+  "lat": 61.46,
+  "lon": 23.72,
+  "timezone": "Europe/Helsinki",
+  "current": {
+    "dt": 1586390400,
+    "sunrise": 1586402481,
+    "sunset": 1586453486,
+    "temp": 6.53,
+    "feels_like": 1.96,
+    "pressure": 1003,
+    "humidity": 83,
+    "dew_point": 3.85,
+    "uvi": 2.97,
+    "clouds": 0,
+    "visibility": 10000,
+    "wind_speed": 4.6,
+    "wind_deg": 230,
+    "weather": [
+      { "id": 500, "main": "Rain", "description": "pieni sade", "icon": "10n" }
+    ],
+    "rain": { "3h": 1 }
+  },
+  "hourly": [
+    {
+      "dt": 1586390400,
+      "temp": 6.53,
+      "feels_like": 1.96,
+      "pressure": 1003,
+      "humidity": 83,
+      "dew_point": 3.85,
+      "clouds": 0,
+      "visibility": 10000,
+      "wind_speed": 4.6,
+      "wind_deg": 230,
+      "weather": [
+        {
+          "id": 500,
+          "main": "Rain",
+          "description": "pieni sade",
+          "icon": "10n"
+        }
+      ],
+      "rain": { "3h": 1 }
+    },
+    {
+      "dt": 1586394000,
+      "temp": 5.24,
+      "feels_like": -0.32,
+      "pressure": 1003,
+      "humidity": 83,
+      "dew_point": 2.59,
+      "clouds": 75,
+      "visibility": 10000,
+      "wind_speed": 5.7,
+      "wind_deg": 310,
+      "weather": [
+        {
+          "id": 803,
+          "main": "Clouds",
+          "description": "hajanaisia pilviä",
+          "icon": "04n"
+        }
+      ]
+    },
+    {
+      "dt": 1586397600,
+      "temp": 4.59,
+      "feels_like": 0.77,
+      "pressure": 1003,
+      "humidity": 84,
+      "dew_point": 2.12,
+      "clouds": 90,
+      "visibility": 10000,
+      "wind_speed": 3.1,
+      "wind_deg": 280,
+      "weather": [
+        {
+          "id": 520,
+          "main": "Rain",
+          "description": "lievä tihkusade",
+          "icon": "09n"
+        }
+      ]
+    },
+    {
+      "dt": 1586401200,
+      "temp": 3.88,
+      "feels_like": -0.76,
+      "pressure": 1003,
+      "humidity": 84,
+      "dew_point": 1.43,
+      "clouds": 75,
+      "visibility": 10000,
+      "wind_speed": 4.1,
+      "wind_deg": 290,
+      "weather": [
+        {
+          "id": 803,
+          "main": "Clouds",
+          "description": "hajanaisia pilviä",
+          "icon": "04n"
+        }
+      ]
+    },
+    {
+      "dt": 1586404800,
+      "temp": 2.99,
+      "feels_like": -2.48,
+      "pressure": 1003,
+      "humidity": 84,
+      "dew_point": 0.56,
+      "clouds": 40,
+      "visibility": 10000,
+      "wind_speed": 5.1,
+      "wind_deg": 280,
+      "weather": [
+        {
+          "id": 802,
+          "main": "Clouds",
+          "description": "ajoittaisia pilviä",
+          "icon": "03d"
+        }
+      ]
+    },
+    {
+      "dt": 1586408400,
+      "temp": 2.99,
+      "feels_like": -2.38,
+      "pressure": 1003,
+      "humidity": 74,
+      "dew_point": -1.04,
+      "clouds": 40,
+      "visibility": 10000,
+      "wind_speed": 4.6,
+      "wind_deg": 280,
+      "weather": [
+        {
+          "id": 802,
+          "main": "Clouds",
+          "description": "ajoittaisia pilviä",
+          "icon": "03d"
+        }
+      ]
+    },
+    {
+      "dt": 1586412000,
+      "temp": 3.2,
+      "feels_like": -3.26,
+      "pressure": 1003,
+      "humidity": 74,
+      "dew_point": -0.87,
+      "clouds": 20,
+      "visibility": 10000,
+      "wind_speed": 6.2,
+      "wind_deg": 280,
+      "weather": [
+        {
+          "id": 801,
+          "main": "Clouds",
+          "description": "vähän pilviä",
+          "icon": "02d"
+        }
+      ]
+    },
+    {
+      "dt": 1586415600,
+      "temp": 4.1,
+      "feels_like": -2.51,
+      "pressure": 1003,
+      "humidity": 64,
+      "dew_point": -1.85,
+      "clouds": 20,
+      "visibility": 10000,
+      "wind_speed": 6.2,
+      "wind_deg": 290,
+      "weather": [
+        {
+          "id": 801,
+          "main": "Clouds",
+          "description": "vähän pilviä",
+          "icon": "02d"
+        }
+      ]
+    },
+    {
+      "dt": 1586419200,
+      "temp": 5.26,
+      "feels_like": -1.09,
+      "pressure": 1003,
+      "humidity": 56,
+      "dew_point": -2.47,
+      "clouds": 75,
+      "visibility": 10000,
+      "wind_speed": 5.7,
+      "wind_deg": 290,
+      "weather": [
+        {
+          "id": 803,
+          "main": "Clouds",
+          "description": "hajanaisia pilviä",
+          "icon": "04d"
+        }
+      ]
+    },
+    {
+      "dt": 1586422800,
+      "temp": 5.36,
+      "feels_like": -2.5,
+      "pressure": 1004,
+      "humidity": 52,
+      "dew_point": -3.27,
+      "clouds": 75,
+      "visibility": 10000,
+      "wind_speed": 7.7,
+      "wind_deg": 290,
+      "weather": [
+        {
+          "id": 803,
+          "main": "Clouds",
+          "description": "hajanaisia pilviä",
+          "icon": "04d"
+        }
+      ]
+    },
+    {
+      "dt": 1586426400,
+      "temp": 6.16,
+      "feels_like": -1.38,
+      "pressure": 1004,
+      "humidity": 48,
+      "dew_point": -3.56,
+      "clouds": 40,
+      "visibility": 10000,
+      "wind_speed": 7.2,
+      "wind_deg": 280,
+      "weather": [
+        {
+          "id": 802,
+          "main": "Clouds",
+          "description": "ajoittaisia pilviä",
+          "icon": "03d"
+        }
+      ]
+    },
+    {
+      "dt": 1586430000,
+      "temp": 7.15,
+      "feels_like": -0.39,
+      "pressure": 1005,
+      "humidity": 45,
+      "dew_point": -3.52,
+      "clouds": 75,
+      "visibility": 10000,
+      "wind_speed": 7.2,
+      "wind_deg": 270,
+      "weather": [
+        {
+          "id": 803,
+          "main": "Clouds",
+          "description": "hajanaisia pilviä",
+          "icon": "04d"
+        }
+      ]
+    },
+    {
+      "dt": 1586433600,
+      "temp": 7.33,
+      "feels_like": 0.86,
+      "pressure": 1006,
+      "humidity": 45,
+      "dew_point": -3.37,
+      "clouds": 75,
+      "visibility": 10000,
+      "wind_speed": 5.7,
+      "wind_deg": 290,
+      "weather": [
+        {
+          "id": 803,
+          "main": "Clouds",
+          "description": "hajanaisia pilviä",
+          "icon": "04d"
+        }
+      ]
+    },
+    {
+      "dt": 1586437200,
+      "temp": 7.34,
+      "feels_like": 0.07,
+      "pressure": 1006,
+      "humidity": 42,
+      "dew_point": -4.18,
+      "clouds": 75,
+      "visibility": 10000,
+      "wind_speed": 6.7,
+      "wind_deg": 300,
+      "weather": [
+        {
+          "id": 803,
+          "main": "Clouds",
+          "description": "hajanaisia pilviä",
+          "icon": "04d"
+        }
+      ]
+    },
+    {
+      "dt": 1586440800,
+      "temp": 7.72,
+      "feels_like": 0.84,
+      "pressure": 1007,
+      "humidity": 42,
+      "dew_point": -3.87,
+      "clouds": 13,
+      "visibility": 10000,
+      "wind_speed": 6.2,
+      "wind_deg": 320,
+      "weather": [
+        {
+          "id": 600,
+          "main": "Snow",
+          "description": "pieni lumisade",
+          "icon": "13d"
+        }
+      ],
+      "snow": { "3h": 0.13 }
+    },
+    {
+      "dt": 1586444400,
+      "temp": 7.14,
+      "feels_like": 0.87,
+      "pressure": 1007,
+      "humidity": 39,
+      "dew_point": -5.21,
+      "clouds": 13,
+      "visibility": 10000,
+      "wind_speed": 5.1,
+      "wind_deg": 320,
+      "weather": [
+        {
+          "id": 600,
+          "main": "Snow",
+          "description": "pieni lumisade",
+          "icon": "13d"
+        }
+      ],
+      "snow": { "3h": 0.13 }
+    },
+    {
+      "dt": 1586448000,
+      "temp": 6.95,
+      "feels_like": 0.34,
+      "pressure": 1009,
+      "humidity": 42,
+      "dew_point": -4.49,
+      "clouds": 13,
+      "visibility": 10000,
+      "wind_speed": 5.7,
+      "wind_deg": 310,
+      "weather": [
+        {
+          "id": 600,
+          "main": "Snow",
+          "description": "pieni lumisade",
+          "icon": "13d"
+        }
+      ],
+      "snow": { "3h": 0.13 }
+    },
+    {
+      "dt": 1586451600,
+      "temp": 5.48,
+      "feels_like": 0.3,
+      "pressure": 1010,
+      "humidity": 45,
+      "dew_point": -4.88,
+      "clouds": 0,
+      "visibility": 10000,
+      "wind_speed": 3.6,
+      "wind_deg": 340,
+      "weather": [
+        {
+          "id": 800,
+          "main": "Clear",
+          "description": "taivas on selkeä",
+          "icon": "01d"
+        }
+      ]
+    },
+    {
+      "dt": 1586455200,
+      "temp": 4.15,
+      "feels_like": -0.72,
+      "pressure": 1010,
+      "humidity": 48,
+      "dew_point": -5.21,
+      "clouds": 0,
+      "visibility": 10000,
+      "wind_speed": 3.1,
+      "wind_deg": 330,
+      "weather": [
+        {
+          "id": 800,
+          "main": "Clear",
+          "description": "taivas on selkeä",
+          "icon": "01n"
+        }
+      ]
+    },
+    {
+      "dt": 1586458800,
+      "temp": 2.63,
+      "feels_like": -1.08,
+      "pressure": 1011,
+      "humidity": 55,
+      "dew_point": -4.87,
+      "clouds": 0,
+      "visibility": 10000,
+      "wind_speed": 1.5,
+      "wind_deg": 310,
+      "weather": [
+        {
+          "id": 800,
+          "main": "Clear",
+          "description": "taivas on selkeä",
+          "icon": "01n"
+        }
+      ]
+    },
+    {
+      "dt": 1586462400,
+      "temp": 0.53,
+      "feels_like": -2.47,
+      "pressure": 1012,
+      "humidity": 81,
+      "dew_point": -2.07,
+      "clouds": 0,
+      "visibility": 10000,
+      "wind_speed": 1,
+      "wind_deg": 0,
+      "weather": [
+        {
+          "id": 800,
+          "main": "Clear",
+          "description": "taivas on selkeä",
+          "icon": "01n"
+        }
+      ]
+    },
+    {
+      "dt": 1586466000,
+      "temp": 0.08,
+      "feels_like": -3.75,
+      "pressure": 1012,
+      "humidity": 81,
+      "dew_point": -2.46,
+      "clouds": 0,
+      "visibility": 10000,
+      "wind_speed": 2.1,
+      "wind_deg": 270,
+      "weather": [
+        {
+          "id": 800,
+          "main": "Clear",
+          "description": "taivas on selkeä",
+          "icon": "01n"
+        }
+      ]
+    },
+    {
+      "dt": 1586469600,
+      "temp": 0.47,
+      "feels_like": -3.31,
+      "pressure": 1012,
+      "humidity": 81,
+      "dew_point": -2.13,
+      "clouds": 0,
+      "visibility": 10000,
+      "wind_speed": 2.1,
+      "wind_deg": 260,
+      "weather": [
+        {
+          "id": 800,
+          "main": "Clear",
+          "description": "taivas on selkeä",
+          "icon": "01n"
+        }
+      ]
+    },
+    {
+      "dt": 1586473200,
+      "temp": 1.2,
+      "feels_like": -3.56,
+      "pressure": 1012,
+      "humidity": 64,
+      "dew_point": -4.29,
+      "clouds": 0,
+      "visibility": 10000,
+      "wind_speed": 3.1,
+      "wind_deg": 290,
+      "weather": [
+        {
+          "id": 800,
+          "main": "Clear",
+          "description": "taivas on selkeä",
+          "icon": "01n"
+        }
+      ]
+    }
+  ]
+}

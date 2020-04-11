@@ -6,18 +6,26 @@
   export let dataKey;
   export let data;
   export let variant = "";
+  export let decimals = 0;
 
   const safeNumber = val => {
-    if (typeof val === 'number') {
+    if (typeof val === "number") {
       return val;
     }
     return NaN;
-  }
+  };
 
-  let realKey = dataKey + variant;
-  let apparentKey = `apparent${cap(realKey)}`;
-  let realData = safeNumber(data[realKey]).toFixed(0);
-  let apparentData = safeNumber(data[apparentKey]).toFixed(0);
+  let realKey = dataKey;
+  let apparentKey = "feels_like";
+  let realData = data[realKey];
+  let apparentData = data[apparentKey];
+  if (variant) {
+    const variantKey = `${variant === "High" ? "day" : "night"}`;
+    realData = realData[variantKey];
+    apparentData = apparentData[variantKey];
+  }
+  realData = safeNumber(realData).toFixed(decimals);
+  apparentData = safeNumber(apparentData).toFixed(decimals);
 
   function cap(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);

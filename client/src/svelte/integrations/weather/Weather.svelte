@@ -8,11 +8,11 @@
   import RuuviTag from "./RuuviTag.svelte";
   import WeatherChart from "./WeatherChart.svelte";
 
-  const integration = "weather/darksky";
+  const integration = "weather/openweathermap";
 
   $: data = [];
   $: w = data[0];
-  $: daily = w ? w.daily.data.slice(0, 4) : [];
+  $: daily = w ? w.daily.slice(0, 4) : [];
 
   const onData = jsonData => {
     if (data && jsonData && jsonData.integration === integration) {
@@ -46,8 +46,6 @@
     <Spacer vertical />
     <WeatherChart {w} />
     <Spacer vertical />
-    <Smaller dimmer>
-      {w.latitude.toFixed(4)}°, {w.longitude.toFixed(4)}°
-    </Smaller>
+    <Smaller dimmer>{w.lat.toFixed(2)}°, {w.lon.toFixed(2)}°</Smaller>
   {/if}
 </div>

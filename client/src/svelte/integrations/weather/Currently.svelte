@@ -3,4 +3,4 @@
   export let w;
 </script>
 
-<WeatherBox {w} data={w.currently} class="weather-box-currently" />
+<WeatherBox {w} data={w.current} class="weather-box-currently" />
