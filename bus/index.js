@@ -1,5 +1,6 @@
 const express = require("express");
 const proxy = require("http-proxy-middleware");
+const bodyParser = require("body-parser");
 
 const PORTS = require("../ports");
 const port = PORTS.bus;
@@ -7,22 +8,29 @@ const uiPath = "ui";
 const config = {
   api: { host: "localhost", port: PORTS.commander, removePath: true },
   ws: { host: "localhost", port: PORTS.commander, removePath: true, ws: true },
-  [uiPath]: { host: "localhost", port: PORTS.client }
+  [uiPath]: { host: "localhost", port: PORTS.client },
 };
 
 const app = express();
+const jsonParser = bodyParser.json();
 
-Object.keys(config).forEach(key => {
+app.post("/error", jsonParser, (req, res) => {
+  console.log("Received JS error:");
+  console.log(req.body.error);
+  res.sendStatus(200);
+});
+
+Object.keys(config).forEach((key) => {
   app.use(
     proxy(`/${key}`, {
       target: `http://${config[key].host}:${config[key].port}`,
       pathRewrite: config[key].removePath
         ? {
-            [`^/${key}`]: ""
+            [`^/${key}`]: "",
           }
         : null,
       logLevel: "debug",
-      ws: config[key].ws
+      ws: config[key].ws,
     })
   );
 });

@@ -17,11 +17,13 @@
     "ramda": "^0.26.1",
     "servor": "^2.0.3",
     "svelte": "^3.20.1",
-    "svelte-router-spa": "^5.5.0"
+    "svelte-router-spa": "^5.5.0",
+    "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.3",
     "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.9.5",
     "@babel/plugin-transform-runtime": "^7.8.3",
     "@babel/preset-env": "^7.8.3",
     "@babel/runtime": "^7.8.3",
@@ -44,13 +46,15 @@
     "style-loader": "^1.0.0",
     "svelte-loader": "^2.13.6",
     "svg-inline-loader": "^0.8.0",
+    "terser-webpack-plugin": "^2.3.5",
     "webpack": "^4.40.2",
+    "webpack-bundle-analyzer": "^3.6.1",
     "webpack-cli": "^3.3.8",
     "webpack-dev-server": "^3.8.0"
   },
   "browserslist": [
     "defaults",
-    "IE 9",
+    "IE 11",
     "Safari 9"
   ]
 }
