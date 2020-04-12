@@ -28,7 +28,7 @@ const getEntities = () => {
   if (config.dummy) {
     return new Promise((resolve, reject) => {
       return resolve([
-        transformEntity(require(`./openweathermap-forecast.json`)),
+        transformEntity(require(`./openweathermap-forecast3.json`)),
       ]);
     });
   } else {

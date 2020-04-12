@@ -1,11 +1,14 @@
 <script>
-  import Router from "svelte-router-spa/src/components/router.svelte";
+  import Route from "svelte-router-spa/src/components/route.svelte";
   import { routeIsActive } from "svelte-router-spa";
   import { navigateTo } from "svelte-router-spa";
   import Menu from "./Menu.svelte";
   import HammerContainer from "./HammerContainer.svelte";
   import pages from "./pages";
   import { BASENAME } from "./routes";
+
+  export let currentRoute;
+  const params = {};
 
   $: activePage = null;
   let timer = null;
@@ -72,7 +75,7 @@
   <HammerContainer {options}>
     <Menu />
     <main>
-      <Router />
+      <Route {currentRoute} {params} />
     </main>
   </HammerContainer>
 </div>

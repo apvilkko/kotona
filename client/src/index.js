@@ -1,6 +1,4 @@
 import App from "./svelte/App.svelte";
-import { SpaRouter } from "svelte-router-spa";
-import routes from "./svelte/routes";
 
 import "./styles/reset.scss";
 import "./styles/global.scss";
@@ -25,11 +23,6 @@ history.replaceState = (f =>
 window.addEventListener("popstate", () => {
   window.dispatchEvent(new Event("locationchange"));
 });
-
-SpaRouter({
-  routes,
-  pathName: document.location.href
-}).getActiveRoute;
 
 new App({
   target: document.getElementById("app")

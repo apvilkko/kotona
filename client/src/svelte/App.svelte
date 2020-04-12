@@ -1,5 +1,6 @@
 <script>
-  import NavigationContainer from "./NavigationContainer.svelte";
+  import Router from "svelte-router-spa/src/components/router.svelte";
+  import routes from "./routes";
 </script>
 
 <style>
@@ -11,4 +12,4 @@
   }
 </style>
 
-<NavigationContainer />
+<Router {routes} />

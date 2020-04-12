@@ -9,7 +9,6 @@
   export let onExit;
   export let currentData;
   export let integrations;
-  export let current;
 
   $: formData = { ...currentData };
 

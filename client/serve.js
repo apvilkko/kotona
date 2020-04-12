@@ -70,7 +70,8 @@ http
   .createServer((req, res) => {
     const pathname = url.parse(req.url).pathname;
     const isRoute = isRouteRequest(pathname);
-    const status = isRoute && pathname !== "/" ? 301 : 200;
+    //const status = isRoute && pathname !== "/" ? 301 : 200;
+    const status = isRoute && pathname !== "/" ? 200 : 200;
     const resource = isRoute ? `/${fallback}` : decodeURI(pathname);
     const uri = path.join(cwd, root, resource);
     const ext = uri.replace(/^.*[\.\/\\]/, "").toLowerCase();
