@@ -66,3 +66,4 @@ commander/secrets.json
 client/dist
 client/distlite
 run.json
+deploy*.bat

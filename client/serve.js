@@ -20,6 +20,7 @@ const root = isLite ? "distlite" : "dist";
 const fallback = process.argv[3] || "index.html";
 const port = process.argv[4] || (isLite ? PORTS.uilite : PORTS.client);
 const cwd = process.cwd();
+const lrPort = isLite ? 5001 : 5000;
 
 const sendError = (res, resource, status) => {
   res.writeHead(status);
@@ -68,7 +69,7 @@ http
       sendMessage(res, "message", "reloading page")
     );
   })
-  .listen(5000);
+  .listen(lrPort);
 
 http
   .createServer((req, res) => {
