@@ -1,0 +1,15 @@
+[Unit]
+Description=Kotona Lite Client Service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/projects/kotona/client
+ExecStart=/home/pi/.nvm/versions/node/v11.12.0/bin/node ./serve.js lite
+User=pi
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

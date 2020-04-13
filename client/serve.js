@@ -6,15 +6,19 @@ const typesJson = require("servor/types.json");
 
 // Modified version of servor
 
+const isLite = !!process.argv[2];
+
 const mime = Object.entries(typesJson).reduce(
   (all, [type, exts]) =>
     Object.assign(all, ...exts.map(ext => ({ [ext]: type }))),
   {}
 );
 
-const root = process.argv[2] || "dist";
+const PORTS = require("../ports.json");
+
+const root = isLite ? "distlite" : "dist";
 const fallback = process.argv[3] || "index.html";
-const port = process.argv[4] || require("../ports.json").client;
+const port = process.argv[4] || (isLite ? PORTS.uilite : PORTS.client);
 const cwd = process.cwd();
 
 const sendError = (res, resource, status) => {
