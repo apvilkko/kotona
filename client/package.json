@@ -7,7 +7,9 @@
     "start": "webpack-dev-server",
     "build": "rimraf dist && cross-env NODE_ENV=production webpack && mkdir dist/ui && mv dist/*.js dist/ui",
     "serve": "node ./serve.js",
-    "test": "jest src"
+    "test": "jest src",
+    "start:lite": "webpack-dev-server --config webpack.uilite.config.js",
+    "build:lite": "rimraf distlite && cross-env NODE_ENV=production webpack --config webpack.uilite.config.js"
   },
   "author": "",
   "license": "ISC",
@@ -50,7 +52,8 @@
     "webpack": "^4.40.2",
     "webpack-bundle-analyzer": "^3.6.1",
     "webpack-cli": "^3.3.8",
-    "webpack-dev-server": "^3.8.0"
+    "webpack-dev-server": "^3.8.0",
+    "webpack-merge": "^4.2.2"
   },
   "browserslist": [
     "defaults",

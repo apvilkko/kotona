@@ -5,10 +5,12 @@ const bodyParser = require("body-parser");
 const PORTS = require("../ports");
 const port = PORTS.bus;
 const uiPath = "ui";
+const uiLitePath = "lite";
 const config = {
   api: { host: "localhost", port: PORTS.commander, removePath: true },
   ws: { host: "localhost", port: PORTS.commander, removePath: true, ws: true },
   [uiPath]: { host: "localhost", port: PORTS.client },
+  [uiLitePath]: { host: "localhost", port: PORTS.uilite },
 };
 
 const app = express();

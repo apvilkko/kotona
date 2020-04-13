@@ -64,4 +64,5 @@ typings/
 commander/data
 commander/secrets.json
 client/dist
+client/distlite
 run.json

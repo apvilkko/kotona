@@ -6,14 +6,20 @@ const PORTS = require("../ports.json");
 
 const common = require("./webpack.common.config");
 
-const DIST = "dist";
+const DIST = "distlite";
 
 const config = {
-  entry: "./src/index.js",
+  entry: "./src/uilite/index.js",
   output: {
     path: path.resolve(__dirname, DIST)
   },
-  plugins: [new HtmlWebpackPlugin({ template: "./src/index.ejs" })]
+  plugins: [new HtmlWebpackPlugin({ template: "./src/uilite/index.ejs" })]
 };
 
-module.exports = merge(common("/ui", PORTS.client), config);
+const com = common("/lite", PORTS.uilite);
+
+const conf = merge(com, config);
+
+console.log(com, conf);
+
+module.exports = conf;
