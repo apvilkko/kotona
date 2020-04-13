@@ -4,6 +4,20 @@ const msb16 = (byte1, byte2) => {
   return Number(`0x${dec2hex(byte1) + dec2hex(byte2)}`);
 };
 
+const preprocess = itemData => {
+  let data;
+  if (Array.isArray(itemData)) {
+    data = itemData.map(Number);
+  } else {
+    const hex = [];
+    for (let i = 0; i < itemData.length - 1; i += 2) {
+      hex.push("0x" + itemData[i] + itemData[i + 1]);
+    }
+    data = hex.map(Number);
+  }
+  return data;
+};
+
 const getTemperature = data => {
   if (data[0] === 3) {
     // V3
@@ -32,4 +46,4 @@ const getHumidity = data => {
   }
   return -1;
 };
-export { getTemperature, getHumidity };
+export { getTemperature, getHumidity, preprocess };

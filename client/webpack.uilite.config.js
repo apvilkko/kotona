@@ -16,10 +16,7 @@ const config = {
   plugins: [new HtmlWebpackPlugin({ template: "./src/uilite/index.ejs" })]
 };
 
-const com = common("/lite", PORTS.uilite);
-
+const com = common("/lite", PORTS.uilite, true);
 const conf = merge(com, config);
-
-console.log(com, conf);
 
 module.exports = conf;

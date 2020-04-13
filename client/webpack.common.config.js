@@ -3,11 +3,29 @@ const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const isProd = process.env.NODE_ENV === "production";
 console.log("production", isProd);
 
-const config = (publicPath, port) => {
+const config = (publicPath, port, extractCss) => {
+  const cssLoaders = ["css-loader", "sass-loader"];
+  if (extractCss) {
+    cssLoaders.unshift(MiniCssExtractPlugin.loader);
+  } else {
+    cssLoaders.unshift("style-loader");
+  }
+  const plugins = [
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+    //new BundleAnalyzerPlugin()
+  ];
+  if (extractCss) {
+    plugins.push(
+      new MiniCssExtractPlugin({
+        filename: "[name].[hash:8].css"
+      })
+    );
+  }
   const conf = {
     mode: isProd ? "production" : "development",
     resolve: {
@@ -71,7 +89,7 @@ const config = (publicPath, port) => {
         },
         {
           test: /\.scss$/i,
-          use: ["style-loader", "css-loader", "sass-loader"]
+          use: cssLoaders
         },
         {
           test: /\.svg/,
@@ -82,10 +100,7 @@ const config = (publicPath, port) => {
         }
       ]
     },
-    plugins: [
-      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
-      //new BundleAnalyzerPlugin()
-    ]
+    plugins
   };
 
   if (!isProd) {
