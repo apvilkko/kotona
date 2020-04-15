@@ -83,17 +83,33 @@ try {
     return section(parts);
   };
 
+  const getOrCreateEl = (id, name, parent) => {
+    let el = document.getElementById(id);
+    if (!el) {
+      el = addEl(name, parent);
+      el.id = id;
+    }
+    return el;
+  };
+
+  const setLoading = el => {
+    el.innerHTML = "Ladataan…";
+  };
+
   const fetchWeather = () => {
     const integration = "weather/openweathermap";
+
+    const curEl = getOrCreateEl("weather", "div");
+    const forecastEl = getOrCreateEl("forecast", "div");
+    setLoading(curEl);
+    forecastEl.innerHTML = "";
+
     const url = `/api/entities?type=${encodeURIComponent(integration)}`;
     fetch(url, resp => {
       const format1 = Object.values(resp[0])[0];
       const data = typeof format1 === "object" ? format1 : resp[0];
 
-      const curEl = addEl("div");
       curEl.innerHTML = weatherbox(data.current);
-
-      const forecastEl = addEl("div");
       forecastEl.innerHTML = data.daily
         .map((x, i) => (i < 4 ? weatherbox(x, true) : ""))
         .join("");
@@ -102,11 +118,13 @@ try {
 
   const fetchTags = () => {
     const integration = "weather/ruuvitag";
+    const curEl = getOrCreateEl("tags", "div", "app2");
+
+    setLoading(curEl);
+
     const url = `/api/entities?type=${encodeURIComponent(integration)}`;
     fetch(url, resp => {
       const data = resp;
-
-      const curEl = addEl("div", "app2");
       curEl.innerHTML = data
         .map(x => {
           return (
@@ -121,7 +139,7 @@ try {
         .join("");
 
       if (DEBUG) {
-        const pre = addEl("pre", "debug");
+        const pre = getOrCreateEl("debug-pre", "pre", "debug");
         pre.innerText = JSON.stringify(data, null, 2);
       }
     });
@@ -130,6 +148,12 @@ try {
   const init = () => {
     const h1 = addEl("h1");
     h1.innerText = "Kotona Lite";
+
+    const updateButton = document.getElementById("update");
+    updateButton.addEventListener("click", () => {
+      fetchWeather();
+      fetchTags();
+    });
 
     fetchWeather();
     fetchTags();
