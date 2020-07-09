@@ -13,13 +13,13 @@ module.exports = () => ({
     {
       plugin: "lights/tradfri",
       enabled: true,
-      //dummy: true,
-      //dummyDb: true,
+      dummy: true,
+      dummyDb: true,
     },
     {
       plugin: "weather/ruuvitag",
       enabled: true,
-      //dummy: true,
+      dummy: true,
       autoClean: false,
       scanTime: 6500,
       polling: {
@@ -31,12 +31,18 @@ module.exports = () => ({
     {
       plugin: "weather/openweathermap",
       enabled: true,
-      //dummy: true,
+      dummy: true,
       readOnly: true,
       polling: {
         default: 15 * 60 * 1000,
         quiet: 60 * 60 * 1000,
       },
     },
+    {
+      plugin: "security/camera",
+      enabled: true,
+      readOnly: true,
+      autoClean: true,
+    }
   ],
 });
