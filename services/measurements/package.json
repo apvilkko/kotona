@@ -1,0 +1,9 @@
+{
+  "name": "measurements",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@abandonware/noble": "^1.9.2-10"
+  }
+}
