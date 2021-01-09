@@ -19,8 +19,9 @@ const initNoble = () =>
 const isOurDevice = macs => mac =>
   macs.map(x => x.addr.toUpperCase()).includes(mac.toUpperCase());
 
-const readBluetooth = devices =>
+const readBluetooth = config =>
   new Promise(async (resolve, reject) => {
+    const devices = config.devices;
     if (!devices || !devices.length) {
       reject([]);
       return;
