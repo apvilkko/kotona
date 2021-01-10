@@ -9,7 +9,7 @@ const config = createConfig().integrations.find(
   (x) => x.plugin === integrationKey
 );
 
-const POLLING_INTERVAL_MS = /*config.polling.default ||*/ 10 * 1000;
+const POLLING_INTERVAL_MS = config.polling.default || 10 * 1000;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
