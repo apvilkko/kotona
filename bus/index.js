@@ -8,6 +8,11 @@ const uiPath = "ui";
 const uiLitePath = "lite";
 const config = {
   api: { host: "localhost", port: PORTS.commander, removePath: true },
+  measurements: {
+    host: "localhost",
+    port: PORTS.measurements,
+    removePath: true,
+  },
   ws: { host: "localhost", port: PORTS.commander, removePath: true, ws: true },
   [uiPath]: { host: "localhost", port: PORTS.client },
   [uiLitePath]: { host: "localhost", port: PORTS.uilite },

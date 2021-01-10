@@ -4,27 +4,33 @@ const db = new sqlite3.Database(
   path.resolve(__dirname, "../data/measurements.db")
 );
 
+let instance;
+
 const init = () => {
-  db.serialize(function () {
-    db.run(`
+  if (!instance) {
+    instance = db;
+    db.serialize(function () {
+      db.run(`
 CREATE TABLE IF NOT EXISTS measurements (
   id INTEGER PRIMARY KEY,
   data TEXT,
   temperature REAL,
   humidity REAL,
   entity INTEGER NOT NULL,
-  datetime TEXT,
+  datetime INTEGER,
   FOREIGN KEY(entity) REFERENCES entities(id)
 );
 `);
-    db.run(`
+      db.run(`
 CREATE TABLE IF NOT EXISTS entities (
   id INTEGER PRIMARY KEY,
   name TEXT,
   entityId TEXT NOT NULL UNIQUE
 );
 `);
-  });
+    });
+  }
+  return instance;
 };
 
 const saveEntity = (e) => {
@@ -81,7 +87,7 @@ const saveMeasurement = (m, id) => {
   temperature=${m.temperature},
   humidity=${m.humidity},
   data='${m.data}',
-  datetime=datetime('now')
+  datetime='${new Date().getTime()}'
   WHERE entity='${id}';
   `);
         });
@@ -90,8 +96,28 @@ const saveMeasurement = (m, id) => {
   });
 };
 
+const getMeasurements = () =>
+  new Promise((resolve, reject) => {
+    db.serialize(function () {
+      db.all(
+        `SELECT measurements.id AS id, temperature, humidity, name, datetime, entityId
+FROM measurements
+INNER JOIN entities ON measurements.entity=entities.id;`,
+        (err, rows) => {
+          if (err) {
+            console.error(err);
+            reject(err);
+            return;
+          }
+          resolve(rows);
+        }
+      );
+    });
+  });
+
 module.exports = {
   init,
   saveEntity,
   saveMeasurement,
+  getMeasurements,
 };

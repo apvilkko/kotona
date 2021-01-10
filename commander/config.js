@@ -18,7 +18,7 @@ module.exports = () => ({
     },
     {
       plugin: "weather/ruuvitag",
-      enabled: true,
+      enabled: false,
       dummy: true,
       autoClean: false,
       scanTime: 6500,
@@ -43,6 +43,6 @@ module.exports = () => ({
       enabled: true,
       readOnly: true,
       autoClean: true,
-    }
+    },
   ],
 });

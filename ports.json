@@ -2,5 +2,6 @@
   "bus": 9450,
   "client": 9451,
   "commander": 9452,
-  "uilite": 9453
+  "uilite": 9453,
+  "measurements": 9454
 }

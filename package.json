@@ -12,7 +12,8 @@
     "dev:bus": "cd ./bus && npm run dev",
     "dev:commander": "cd ./commander && npm run dev",
     "dev:client": "cd ./client && npm start",
-    "dev": "run-p dev:bus dev:commander dev:client"
+    "dev:measurements": "cd ./services/measurements && yarn start",
+    "dev": "run-p dev:bus dev:commander dev:client dev:measurements"
   },
   "repository": {
     "type": "git",

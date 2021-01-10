@@ -1,5 +1,27 @@
 const noble = require("@abandonware/noble");
 
+const listener = {
+  context: {},
+  setContext: (obj) => {
+    listener.context = obj;
+  },
+  onDiscover: (p) => {
+    const { isOk, deviceData } = listener.context;
+    if (
+      isOk(p.address) &&
+      p.advertisement &&
+      p.advertisement.manufacturerData
+    ) {
+      // Remove preamble from data
+      deviceData[
+        p.address.toUpperCase()
+      ].data = p.advertisement.manufacturerData
+        .toString("hex")
+        .replace(/^(\d{0,4})(03|05)/, "$2");
+    }
+  },
+};
+
 const initNoble = () =>
   new Promise((resolve, reject) => {
     if (!noble) {
@@ -7,6 +29,7 @@ const initNoble = () =>
     } else {
       noble.once("stateChange", (state) => {
         if (state === "poweredOn") {
+          noble.on("discover", listener.onDiscover);
           resolve();
         } else {
           console.error("Failed to init noble:", state);
@@ -28,7 +51,6 @@ const readBluetooth = (config) =>
     }
 
     const deviceData = {};
-    const isOk = isOurDevice(devices);
 
     for (let i = 0; i < devices.length; ++i) {
       expectedDevice = devices[i].addr.toUpperCase();
@@ -38,6 +60,11 @@ const readBluetooth = (config) =>
         data: [],
       };
     }
+
+    listener.setContext({
+      isOk: isOurDevice(devices),
+      deviceData,
+    });
 
     noble.startScanning([], true, (error) => {
       if (error) {
@@ -56,21 +83,6 @@ const readBluetooth = (config) =>
         console.log(`Read data from ${ret.length} BLE devices.`);
         resolve(ret);
       }, config.scanTime);
-    });
-
-    noble.on("discover", (p) => {
-      if (
-        isOk(p.address) &&
-        p.advertisement &&
-        p.advertisement.manufacturerData
-      ) {
-        // Remove preamble from data
-        deviceData[
-          p.address.toUpperCase()
-        ].data = p.advertisement.manufacturerData
-          .toString("hex")
-          .replace(/^(\d{0,4})(03|05)/, "$2");
-      }
     });
   });
 
