@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/home/pi/projects/kotona/commander
-ExecStart=/home/pi/.nvm/versions/node/v11.12.0/bin/node ./src/api.js
+ExecStart=/home/pi/.nvm/versions/node/v12.20.1/bin/node ./src/api.js
 User=pi
 StandardOutput=inherit
 StandardError=inherit
