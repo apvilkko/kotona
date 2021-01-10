@@ -5,7 +5,7 @@ const initNoble = () =>
     if (!noble) {
       reject();
     } else {
-      noble.once("stateChange", state => {
+      noble.once("stateChange", (state) => {
         if (state === "poweredOn") {
           resolve();
         } else {
@@ -16,10 +16,10 @@ const initNoble = () =>
     }
   });
 
-const isOurDevice = macs => mac =>
-  macs.map(x => x.addr.toUpperCase()).includes(mac.toUpperCase());
+const isOurDevice = (macs) => (mac) =>
+  macs.map((x) => x.addr.toUpperCase()).includes(mac.toUpperCase());
 
-const readBluetooth = config =>
+const readBluetooth = (config) =>
   new Promise(async (resolve, reject) => {
     const devices = config.devices;
     if (!devices || !devices.length) {
@@ -35,11 +35,11 @@ const readBluetooth = config =>
       deviceData[expectedDevice] = {
         entityId: expectedDevice,
         name: devices[i].name,
-        data: []
+        data: [],
       };
     }
 
-    noble.startScanning([], true, error => {
+    noble.startScanning([], true, (error) => {
       if (error) {
         console.error("noble scan error:", error);
         return;
@@ -47,7 +47,7 @@ const readBluetooth = config =>
       setTimeout(() => {
         noble.stopScanning();
         const ret = [];
-        Object.keys(deviceData).forEach(key => {
+        Object.keys(deviceData).forEach((key) => {
           const data = deviceData[key];
           if (data && data.data && data.data.length > 1) {
             ret.push(data);
@@ -58,7 +58,7 @@ const readBluetooth = config =>
       }, config.scanTime);
     });
 
-    noble.on("discover", p => {
+    noble.on("discover", (p) => {
       if (
         isOk(p.address) &&
         p.advertisement &&
@@ -74,7 +74,7 @@ const readBluetooth = config =>
     });
   });
 
-  module.exports = {
-    initNoble,
-    readBluetooth
-  }
+module.exports = {
+  initNoble,
+  readBluetooth,
+};

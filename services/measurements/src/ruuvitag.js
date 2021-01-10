@@ -1,9 +1,8 @@
-const dec2hex = i => (i + 0x100).toString(16).substr(-2);
+const dec2hex = (i) => (i + 0x100).toString(16).substr(-2);
 
-const msb16 = (byte1, byte2) =>
-  Number(`0x${dec2hex(byte1) + dec2hex(byte2)}`);
+const msb16 = (byte1, byte2) => Number(`0x${dec2hex(byte1) + dec2hex(byte2)}`);
 
-const preprocess = itemData => {
+const preprocess = (itemData) => {
   let data;
   if (Array.isArray(itemData)) {
     data = itemData.map(Number);
@@ -17,7 +16,7 @@ const preprocess = itemData => {
   return data;
 };
 
-const getTemperature = data => {
+const getTemperature = (data) => {
   if (data[0] === 3) {
     // V3
     const sign = data[2] > 127 ? -1 : 1;
@@ -35,7 +34,7 @@ const getTemperature = data => {
   return -1;
 };
 
-const getHumidity = data => {
+const getHumidity = (data) => {
   if (data[0] === 3) {
     return data[1] / 2;
   } else if (data[0] === 5) {
