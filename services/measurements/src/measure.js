@@ -32,11 +32,16 @@ const readMeasurements = () =>
         decoded.forEach((d) => {
           saveEntity(d).then((id) => saveMeasurement(d, id));
         });
+        console.log("Sleeping for", POLLING_INTERVAL_MS);
         sleep(POLLING_INTERVAL_MS).then(() => {
+          console.log("wake from sleep");
           resolve();
         });
       })
-      .catch((err) => reject(err));
+      .catch((err) => {
+        console.log("readMeasurements catch", err);
+        reject(err);
+      });
   });
 
 module.exports = { initMeasurements, readMeasurements };

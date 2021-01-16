@@ -17,6 +17,6 @@ initMeasurements()
     });
   })
   .catch((e) => {
-    console.error(e);
+    console.error("initMeasurements catch", e);
     process.exit(1);
   });

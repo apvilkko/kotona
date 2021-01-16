@@ -18,6 +18,7 @@ const listener = {
       ].data = p.advertisement.manufacturerData
         .toString("hex")
         .replace(/^(\d{0,4})(03|05)/, "$2");
+      console.log("onDiscover", p.address);
     }
   },
 };
@@ -30,6 +31,9 @@ const initNoble = () =>
       noble.once("stateChange", (state) => {
         if (state === "poweredOn") {
           noble.on("discover", listener.onDiscover);
+          noble.on("warning", (message) => {
+            console.log("noble warning event:", message);
+          });
           resolve();
         } else {
           console.error("Failed to init noble:", state);
@@ -46,6 +50,7 @@ const readBluetooth = (config) =>
   new Promise(async (resolve, reject) => {
     const devices = config.devices;
     if (!devices || !devices.length) {
+      console.log("no devices, bailing out");
       reject([]);
       return;
     }
@@ -72,6 +77,7 @@ const readBluetooth = (config) =>
         return;
       }
       setTimeout(() => {
+        console.log("-> stopScanning");
         noble.stopScanning();
         const ret = [];
         Object.keys(deviceData).forEach((key) => {
