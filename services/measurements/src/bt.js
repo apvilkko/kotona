@@ -74,8 +74,10 @@ const readBluetooth = (config) =>
     noble.startScanning([], true, (error) => {
       if (error) {
         console.error("noble scan error:", error);
+        reject([]);
         return;
       }
+      console.log("starting timeout", config.scanTime);
       setTimeout(() => {
         console.log("-> stopScanning");
         noble.stopScanning();
