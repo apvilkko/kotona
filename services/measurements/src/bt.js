@@ -18,7 +18,7 @@ const listener = {
       ].data = p.advertisement.manufacturerData
         .toString("hex")
         .replace(/^(\d{0,4})(03|05)/, "$2");
-      console.log("onDiscover", p.address);
+      //console.log("onDiscover", p.address);
     }
   },
 };
@@ -79,7 +79,7 @@ const readBluetooth = (config) =>
       }
       console.log("starting timeout", config.scanTime);
       setTimeout(() => {
-        console.log("-> stopScanning");
+        //console.log("-> stopScanning");
         noble.stopScanning();
         const ret = [];
         Object.keys(deviceData).forEach((key) => {

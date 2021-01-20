@@ -32,9 +32,9 @@ const readMeasurements = () =>
         decoded.forEach((d) => {
           saveEntity(d).then((id) => saveMeasurement(d, id));
         });
-        console.log("Sleeping for", POLLING_INTERVAL_MS);
+        //console.log("Sleeping for", POLLING_INTERVAL_MS);
         sleep(POLLING_INTERVAL_MS).then(() => {
-          console.log("wake from sleep");
+          //console.log("wake from sleep");
           resolve();
         });
       })
