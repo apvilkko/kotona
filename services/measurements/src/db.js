@@ -115,9 +115,27 @@ INNER JOIN entities ON measurements.entity=entities.id;`,
     });
   });
 
+const getLatestTimestamp = () =>
+  new Promise((resolve, reject) => {
+    db.serialize(function () {
+      db.all(
+        `SELECT datetime FROM measurements ORDER BY datetime DESC LIMIT 1;`,
+        (err, rows) => {
+          if (err) {
+            console.error(err);
+            reject(err);
+            return;
+          }
+          resolve(rows.length > 0 ? rows[0].datetime : undefined);
+        }
+      );
+    });
+  });
+
 module.exports = {
   init,
   saveEntity,
   saveMeasurement,
   getMeasurements,
+  getLatestTimestamp,
 };
