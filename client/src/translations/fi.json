@@ -23,5 +23,7 @@
   "Switch": "Kytkin",
   "Type": "Tyyppi",
   "Choose": "Valitse",
-  "Loading": "Ladataan"
+  "Loading": "Ladataan",
+  "On": "Päälle",
+  "Off": "Pois"
 }

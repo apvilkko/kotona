@@ -57,8 +57,6 @@
     "webpack-merge": "^4.2.2"
   },
   "browserslist": [
-    "defaults",
-    "IE 11",
-    "Safari 9"
+    "defaults"
   ]
 }
