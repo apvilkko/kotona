@@ -87,7 +87,7 @@ const saveMeasurement = (m, id) => {
   temperature=${m.temperature},
   humidity=${m.humidity},
   data='${m.data}',
-  datetime='${new Date().getTime()}'
+  datetime='${m.datetime || new Date().getTime()}'
   WHERE entity='${id}';
   `);
         });
@@ -115,6 +115,20 @@ INNER JOIN entities ON measurements.entity=entities.id;`,
     });
   });
 
+const getEntity = (mac) =>
+  new Promise((resolve, reject) => {
+    db.serialize(function () {
+      db.get(`SELECT id FROM entities WHERE entityId='${mac}';`, (err, row) => {
+        if (err) {
+          console.error(err);
+          reject(err);
+          return;
+        }
+        resolve(row);
+      });
+    });
+  });
+
 const getLatestTimestamp = () =>
   new Promise((resolve, reject) => {
     db.serialize(function () {
@@ -138,4 +152,5 @@ module.exports = {
   saveMeasurement,
   getMeasurements,
   getLatestTimestamp,
+  getEntity,
 };
