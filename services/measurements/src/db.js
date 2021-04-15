@@ -28,6 +28,12 @@ CREATE TABLE IF NOT EXISTS entities (
   entityId TEXT NOT NULL UNIQUE
 );
 `);
+      db.run(`
+CREATE TABLE IF NOT EXISTS saunamode (
+  id INTEGER PRIMARY KEY,
+  started INTEGER
+)
+`);
     });
   }
   return instance;
@@ -64,6 +70,54 @@ const saveEntity = (e) => {
           });
         }
       );
+    });
+  });
+};
+
+const getSaunaMode = () =>
+  new Promise((resolve, reject) => {
+    db.serialize(function () {
+      db.all(`SELECT id,started FROM saunamode LIMIT 1;`, (err, rows) => {
+        if (err) {
+          console.error(err);
+          reject(err);
+          return;
+        }
+        resolve(rows.length > 0 ? rows[0] : undefined);
+      });
+    });
+  });
+
+const setSaunaMode = (started) => {
+  db.serialize(function () {
+    db.get(`SELECT id FROM saunamode WHERE id > 0;`, (err, row) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      let id = row ? row.id : undefined;
+      db.serialize(function () {
+        if (!id) {
+          db.run(
+            `INSERT INTO saunamode(started) VALUES(NULL);`,
+            function (ierr) {
+              if (ierr) {
+                console.error(ierr);
+                return;
+              } else {
+                id = this.lastID;
+              }
+            }
+          );
+        }
+        if (id) {
+          db.run(`
+UPDATE saunamode SET
+started=${started ? "'" + new Date().getTime() + "'" : "NULL"}
+WHERE id=${id};
+`);
+        }
+      });
     });
   });
 };
@@ -153,4 +207,6 @@ module.exports = {
   getMeasurements,
   getLatestTimestamp,
   getEntity,
+  setSaunaMode,
+  getSaunaMode,
 };
