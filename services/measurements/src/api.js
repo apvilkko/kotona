@@ -6,6 +6,7 @@ const {
   saveMeasurement,
   setSaunaMode,
   getSaunaMode,
+  saveEntity,
 } = require("./db");
 
 const app = express();
@@ -29,16 +30,18 @@ const startServer = (cb) => {
     if (tags && tags.length) {
       for (let i = 0; i < tags.length; ++i) {
         const tag = tags[i];
-        const id = await getEntity(tag.id);
-        if (id && id.id && tag.updateAt) {
-          saveMeasurement(
-            {
-              data: "05",
-              temperature: tag.temperature,
-              humidity: tag.humidity,
-              datetime: new Date(tag.updateAt).getTime(),
-            },
-            id.id
+        const entityId = tag ? tag.id : undefined;
+        if (entityId && tag.updateAt) {
+          saveEntity({ entityId, name: tag.name }).then((id) =>
+            saveMeasurement(
+              {
+                data: "05",
+                temperature: tag.temperature,
+                humidity: tag.humidity,
+                datetime: new Date(tag.updateAt).getTime(),
+              },
+              id
+            )
           );
         }
       }
