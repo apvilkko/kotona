@@ -17,7 +17,11 @@ const startServer = (cb) => {
   app.get("/", async (req, res) => {
     const data = await getMeasurements();
     res.setHeader("Content-Type", "application/json");
-    res.end(JSON.stringify(data, null, 2));
+    const obj = data.reduce((acc, curr) => {
+      acc[curr.name] = curr;
+      return acc;
+    }, {});
+    res.end(JSON.stringify(obj, null, 2));
   });
 
   app.post("/", async (req, res) => {
