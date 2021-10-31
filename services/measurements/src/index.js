@@ -2,7 +2,9 @@ const { startServer } = require("./api");
 const { init, getLatestTimestamp } = require("./db");
 const { initMeasurements, readMeasurements } = require("./measure");
 
-const db = init();
+const filename = process.argv.length > 2 ? process.argv[2] : undefined;
+
+const db = init(filename);
 
 const startPolling = async () => {
   while (true) {

@@ -1,14 +1,16 @@
 const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database(
-  path.resolve(__dirname, "../data/measurements.db")
-);
 
 let instance;
+let db;
 
-const init = () => {
+const init = (filename) => {
   if (!instance) {
-    instance = db;
+    const dbfile =
+      filename || path.resolve(__dirname, "../data/measurements.db");
+    instance = new sqlite3.Database(dbfile);
+    console.log(`Using db file ${dbfile}`);
+    db = instance;
     db.serialize(function () {
       db.run(`
 CREATE TABLE IF NOT EXISTS measurements (
